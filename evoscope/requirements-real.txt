@@ -1,0 +1,5 @@
+# Optional real-environment dependencies; the core and offline demo use stdlib.
+# Record resolved versions with `python -m evoscope doctor` in every experiment.
+openai>=1.0
+alfworld==0.4.2
+textworld[pddl]==1.7.0

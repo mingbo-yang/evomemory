@@ -1,0 +1,18 @@
+[
+  {
+    "id": "put-held-object",
+    "key": "put place object receptacle holding destination",
+    "when": "The agent is holding the requested object, is at the requested destination, and observations confirm all required object transformations are complete.",
+    "do": "Use the admissible placement action to put the held object in or on the requested receptacle.",
+    "version": 1,
+    "evidence_ids": []
+  },
+  {
+    "id": "open-container",
+    "key": "find search object closed cabinet drawer fridge container",
+    "when": "The agent is searching for an object and the current observation shows a relevant closed container that has not been inspected.",
+    "do": "Open that container using an admissible action, then inspect its visible contents.",
+    "version": 1,
+    "evidence_ids": []
+  }
+]

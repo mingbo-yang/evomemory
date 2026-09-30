@@ -1,0 +1,216 @@
+{
+  "format": "source-only",
+  "excluded": [
+    ".local/",
+    ".env*",
+    "results/",
+    "archives",
+    "virtualenvs"
+  ],
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "6f2232e36846e5fd3a16c30526ecd09df019668b4b24adaf99c623dd81657a0e"
+    },
+    {
+      "path": "evoscope/.gitignore",
+      "sha256": "114f78aa9014a3070902979bab7c09e29eeb0c8bc4aba952fd5e7ba7379ec22f"
+    },
+    {
+      "path": "evoscope/README.md",
+      "sha256": "be5a1348c788b5b64b3fb830d24c3ae7ee098f8611105e2c40db5ad758c58321"
+    },
+    {
+      "path": "evoscope/__init__.py",
+      "sha256": "5ddfa55c29e78197ec2bc3d09f428149cba6a7a23efb40478258d2b2664279e6"
+    },
+    {
+      "path": "evoscope/__main__.py",
+      "sha256": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d"
+    },
+    {
+      "path": "evoscope/cli.py",
+      "sha256": "66d83ae0a204fbf0e78ff145d98ddda3dc6f3cefae947ed8ecd650a550c0c75d"
+    },
+    {
+      "path": "evoscope/core.py",
+      "sha256": "412f53822197bf8c805feae263d2334594d762a1d5ed68a18f5f27afbf8f53c7"
+    },
+    {
+      "path": "evoscope/docs/ALFWORLD_RESOURCE_FIX.md",
+      "sha256": "d797ad7010d98ed696f40257dc0f79d150eb6f6857338d78420a72e4693de914"
+    },
+    {
+      "path": "evoscope/docs/LIVE_SMOKE_REPORT.md",
+      "sha256": "7249628240e8e1dd5b8d05d6a9813951fc8a0db9415816af56e7f594b76fdcd1"
+    },
+    {
+      "path": "evoscope/docs/METHOD.md",
+      "sha256": "5864feccb2b28f2ba7fdb2de9f3847976d48b83243c9fefc284eee907d5e0c9e"
+    },
+    {
+      "path": "evoscope/docs/PROTOCOL_V3.md",
+      "sha256": "ca70998af3872441036d690d7f6050d156b311742c64b9d1ea3ed8fb1b293897"
+    },
+    {
+      "path": "evoscope/docs/PROTOCOL_V3_VALIDATION.md",
+      "sha256": "978fe887b1909856ae4682a948858abefd7641bdf990b7af09501b45c53f0cd7"
+    },
+    {
+      "path": "evoscope/docs/README.md",
+      "sha256": "61f084da22e978fde39434b2c0bd615ed9af22ef5cc0ef03a3806c691de10180"
+    },
+    {
+      "path": "evoscope/docs/RELIABILITY_V2.md",
+      "sha256": "953136c1c75686e23548ab06a2e30d11687e7490f5566f541c88a33f8f7e1ccb"
+    },
+    {
+      "path": "evoscope/docs/SCOPE_TRIAL.md",
+      "sha256": "fdc5303bf2b1d7cbae49768d152ed0e76925ace94fba49677c33f30023f3c5c0"
+    },
+    {
+      "path": "evoscope/docs/ZERO_UPDATE_DIAGNOSIS_20260926.md",
+      "sha256": "bdcf50094fbc026a11be17e76e80139f2e94c64d1af2504f212d34fd27f1b569"
+    },
+    {
+      "path": "evoscope/editor_budget.py",
+      "sha256": "a929e45bd27ac0f39ca4c7fd931bee8354d1feb7e356a36b92c32a097782952f"
+    },
+    {
+      "path": "evoscope/engine.py",
+      "sha256": "36bebc2cba7c8ab14c4fa3c41ce1ea75ba4e925ca2c3100b9528f2fda54e2ed1"
+    },
+    {
+      "path": "evoscope/environments.py",
+      "sha256": "46ae0d7b77e23b14845abf81e252539613366c94758210d3eee1b1af30515363"
+    },
+    {
+      "path": "evoscope/examples/initial_policies.json",
+      "sha256": "70f2f0ab0a7302912d8b3b0deae413095d5c7699e42c3601824744cfaceab317"
+    },
+    {
+      "path": "evoscope/examples/manifest.template.json",
+      "sha256": "35433674a6880f92b4ef02415ec0758f780ef772c27266c633e4f8958b2ee545"
+    },
+    {
+      "path": "evoscope/gate_plan.py",
+      "sha256": "ad73ea37c2cbf8aa9b7ee4ceee6830a79772650708a880e4662b2c5dcca0d565"
+    },
+    {
+      "path": "evoscope/local_expanded.py",
+      "sha256": "1c3bcc8f550080c7753a02792579fea40d8d0b9c89ea41b39841f3eedd7e825d"
+    },
+    {
+      "path": "evoscope/local_watchdog.py",
+      "sha256": "fb953210ec0ee9d5cf03f16005b190a1198bd8d057c4dfca5380f976ceed5821"
+    },
+    {
+      "path": "evoscope/models.py",
+      "sha256": "f03081e3599ca9062991013d9170c5f966d57516a26b7b78090114330040f16b"
+    },
+    {
+      "path": "evoscope/package_source.py",
+      "sha256": "b0ce57fba0c3c4086e287acbeae9f17e5ada0ba48fe0f9744936ab8880232a7c"
+    },
+    {
+      "path": "evoscope/protocol_validation.py",
+      "sha256": "8cb35ffa54e27f27300c0dc6c65b039bd42616a0ab3cdeff65ae69261ed5ca52"
+    },
+    {
+      "path": "evoscope/provider.py",
+      "sha256": "31e8c1d1c254100b3f909c05b918e685ab9299653a84abd1abe5607e5bccd8e7"
+    },
+    {
+      "path": "evoscope/requirements-real.txt",
+      "sha256": "14a543bbd1a0693740e311967ad5bd86902a685c3b88ff5b9777e445a8a48cd4"
+    },
+    {
+      "path": "evoscope/requirements-test.txt",
+      "sha256": "1ef75474622295e26ce5f0ea6963e662181a9949d1ae696d8334c9c355432fa1"
+    },
+    {
+      "path": "evoscope/run_tests.py",
+      "sha256": "21e68f0e7996946948d5d7423c945bb11c45c7994f0f8fff44d47d1b9be43e6b"
+    },
+    {
+      "path": "evoscope/runner.py",
+      "sha256": "82625991c6a6a5db10ac0dfd941bc4fab56a59b5974f71e93688265e282292b8"
+    },
+    {
+      "path": "evoscope/scope_trial.py",
+      "sha256": "43d05f509d3a47931706cef26e3cb43d823ae834c7ba194c00967f82b9051a64"
+    },
+    {
+      "path": "evoscope/scripts/serve_glm_local.sh",
+      "sha256": "4cd90484deadce447312199e268399178127c45e0aca258742626ed036fb59b0"
+    },
+    {
+      "path": "evoscope/scripts/serve_qwen9b_local.sh",
+      "sha256": "10db2b2274ad44eaf2b7dd83fc9ddcf19598c237614c0707937eb77e8e060f53"
+    },
+    {
+      "path": "evoscope/scripts/serve_qwen_local.sh",
+      "sha256": "9e4270f1a70b2029ed03abe924f6299c54a76ec243720e1d2c1090dc568f79ed"
+    },
+    {
+      "path": "evoscope/tests/test_adapters.py",
+      "sha256": "202209e0bc9dbdbfa24bf6b4b70964da7de96f438737a22a5b9e18519be2c5e3"
+    },
+    {
+      "path": "evoscope/tests/test_evoscope.py",
+      "sha256": "f07dce63645d2a3687fc59f7e1231c63967993aae2d1cfbd4c67f35e1b1886e1"
+    },
+    {
+      "path": "evoscope/tests/test_experiment_controls.py",
+      "sha256": "2af0cc127589fce7286b3c765082b6fa95016dfcdf10457ce72a880bcb08042b"
+    },
+    {
+      "path": "evoscope/tests/test_failures.py",
+      "sha256": "8b793f9d1274e407891547438ef008274c5ca90ee2362e853a1e5209b98777f4"
+    },
+    {
+      "path": "evoscope/tests/test_gateway.py",
+      "sha256": "a21d6aa33619ab5f78075ffe6a0671a4c25867f7ef9ed774b07b7974cf988a94"
+    },
+    {
+      "path": "evoscope/tests/test_initialization.py",
+      "sha256": "257351260ebc5e697db3508d76bfc5186537a32a1e6735e162d97ffa76284d74"
+    },
+    {
+      "path": "evoscope/tests/test_local_watchdog.py",
+      "sha256": "3557a81277942dba463d09dfe5ac2d6c9d8e953d6abd8a7af0c70db9ff981706"
+    },
+    {
+      "path": "evoscope/tests/test_local_webshop.py",
+      "sha256": "b71a3e3e871ca674211bd204307853fabd340ac5c1fe9082403f4a751eeb5f56"
+    },
+    {
+      "path": "evoscope/tests/test_native_actions.py",
+      "sha256": "c0168821542f26e39bb9f9700b4d0cd41a2a30dda5141f326f7634dbcb12e09d"
+    },
+    {
+      "path": "evoscope/tests/test_phase_one.py",
+      "sha256": "71ccfdc3ea6b9a2fb1d5705d0b21eb66d13b07cf916fd207853546398d21c5be"
+    },
+    {
+      "path": "evoscope/tests/test_protocol_v3.py",
+      "sha256": "e3d8bc653c716437cae11f26c6719038da975f7774947582764b8427eabc7320"
+    },
+    {
+      "path": "evoscope/tests/test_protocol_validation.py",
+      "sha256": "7d1922723209e39708e3749e010cebe9e0b6e6dbb5e775b917e3b791ffb31d81"
+    },
+    {
+      "path": "evoscope/tests/test_reliability.py",
+      "sha256": "7fa0cac3c0d9e6d721ba5d4231cf70b4a26401b26e19ed0e6dc1c7738817ffdb"
+    },
+    {
+      "path": "evoscope/tests/test_scope_trial.py",
+      "sha256": "22cb4d8db6183e92128f89affec68a6d0f90c827c6d696dabd0476095b4ade92"
+    },
+    {
+      "path": "evoscope/tests/test_stratified_summary.py",
+      "sha256": "f005572d7c455cc030d02124845bb879825043d69a70b9957d9a4cdc097bc501"
+    }
+  ]
+}

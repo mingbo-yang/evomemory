@@ -1,0 +1,11 @@
+__pycache__/
+.pytest_cache/
+*.pyc
+.cache/
+memevolve-venv/
+downloads/
+evoscope/.local/
+evoscope/results/
+.env
+.env.*
+*.zip
