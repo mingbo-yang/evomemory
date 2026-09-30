@@ -36,7 +36,7 @@
 
 训练入口为 `exp/train_laya_acceptance.py`，分类评估入口为 `exp/evaluate_laya_acceptance.py`，标签导出入口为 `exp/prepare_acceptance_training.py`。`run_laya_acceptance_job.py` 顺序执行训练和开发集评估。新模型保存在本机 `model/laya-multilingual-accept-reject-v1/`，不上传模型权重或训练数据。
 
-2026-09-30 已启动 GPU 3 的真实 COMET 重标注和训练任务，按开发集 macro F1 选择四轮训练中的最佳检查点，冻结后再生成测试标签与评估。实验结果另行报告；回归测试通过不代表实际效果已验证。
+2026-09-30 已完成 GPU 3 的真实 COMET 重标注、4 轮训练与冻结后测试，按开发集 macro F1 选中第 3 轮检查点。449 条实际修改上的测试准确率为 55.01%（基础 Laya 44.77%），但尚未证实稳定的质量收益。详见 [训练与测试报告](exp/reports/LAYA_BINARY_TRAINING_V1.md)。本次没有运行新模型的 full_online 端到端实验。
 
 ## 环境与外部资源
 

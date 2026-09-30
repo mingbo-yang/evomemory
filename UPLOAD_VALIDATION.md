@@ -4,7 +4,7 @@ Current Laya task: Accept/Reject with raw two-option classification. Exact no-op
 
 Validation: 60 tests and 14 subtests passed in the local experiment checkout, including reference isolation, no-op bypass, delayed memory admission and preservation of COMET virtual-environment/checkpoint symlinks. Static checks and patch whitespace checks passed. Source checksums match the synchronized local files; no weight, training-data or credential artifacts are included.
 
-Real GPU 3 labeling/training/frozen-test evaluation has started. Classification and end-to-end results are not claimed in this publication. Runtime output and model weights stay on the experiment server.
+Real GPU 3 labeling, four training epochs, frozen-test evaluation and base-model comparison are complete; see `exp/reports/LAYA_BINARY_TRAINING_V1.md`. Test accuracy increased from 44.77% (base Laya) to 55.01%, but stable quality gain is not demonstrated. No new-model full_online rollout was run. Runtime output and model weights stay on the experiment server.
 
 ---
 

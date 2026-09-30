@@ -91,8 +91,8 @@
     },
     {
       "path": "exp/README.md",
-      "sha256": "f95c582527d698c017b1d6ecf61c7219460572ea01a9fcd79ea94abeb3eab56b",
-      "bytes": 2335
+      "sha256": "fac19dc903c22d3d43949c06cfc832a9d5357c1fa6df05c53e9b26f5471dc736",
+      "bytes": 2400
     },
     {
       "path": "exp/acceptance_data.py",
@@ -571,8 +571,13 @@
     },
     {
       "path": "exp/reports/LAYA_BINARY_PROTOCOL.md",
-      "sha256": "770c28df08d55d5181cd35979f322f886b4d8195d0d42fe78f105ed602e475ad",
-      "bytes": 6970
+      "sha256": "0bb94250f576b88cec569b01b0a731a3d23c8305b69a062c1082e05c3aa7faa9",
+      "bytes": 7136
+    },
+    {
+      "path": "exp/reports/LAYA_BINARY_TRAINING_V1.md",
+      "sha256": "695c11489a243a3eb50b8785224176c7772df30f44cb14269bc372f042ac2284",
+      "bytes": 4172
     },
     {
       "path": "exp/reports/LAYA_FAILURE_INVESTIGATION.md",

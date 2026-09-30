@@ -42,7 +42,7 @@ Candidate 被 Accept 不保证入库；被 Reject 也不阻止事后正反馈入
 
 ## 本地入口
 
-以下入口按顺序执行标注、训练与验证。2026-09-30 已启动 GPU 3 实验，运行状态以本地 `runs/laya_binary_train_job_v1/status.json` 为准：
+以下入口按顺序执行标注、训练与验证。2026-09-30 已完成 GPU 3 的标注、训练和冻结后分类测试，结果见 [训练测试报告](LAYA_BINARY_TRAINING_V1.md)；本地运行状态记录于 `runs/laya_binary_train_job_v1/status.json`：
 
 ```bash
 cd /mnt/huawei/ymb/aaai2027/exp
@@ -70,6 +70,6 @@ COMET 使用本地 `wmt22-comet-da` 和独立 Python 环境，默认在 CPU 上�
 
 回归测试使用人工夹具验证两选项输入与梯度、标签与参考隔离、无阈值动作、真实 before、Reject 正例入库、Accept 负例不入库，以及冻结库/在线库差异；不代表真实模型效果。另检查本地真实 tokenizer 的两选项编码，不加载生成器或判别器权重。
 
-初次代码迁移时尚未执行真实 COMET 重新标注、二分类模型训练和独立测试；当前 GPU 实验结果需单独报告。原训练权重、数据和历史结果不改写。
+初次代码迁移时尚未执行真实 COMET 重新标注、二分类模型训练和独立测试；真实 GPU 训练与分类测试结果现已单独记录在 [训练测试报告](LAYA_BINARY_TRAINING_V1.md)。原训练权重、数据和历史结果不改写。
 
 二分类初次迁移检查保存在 [实施检查记录](LAYA_BINARY_IMPLEMENTATION_CHECKS.json)。本次 no-op 规则更新后，59 项测试与 14 项子测试通过，静态检查通过，详见 [no-op 检查记录](LAYA_NO_OP_IMPLEMENTATION_CHECKS.json)。这些测试明确覆盖“文本改变但 COMET 相同仍保留为 Reject”，以及全部数据折的 no-op 排除与运行时模型调用跳过。
