@@ -13,14 +13,14 @@ import time
 import numpy as np
 from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
 
-from laya_acceptance_common import (
+from legacy_laya_v1.laya_acceptance_common import (
     ROOT, OUT, LABELS, read_jsonl, digest, dump, probabilities, allowed,
 )
 
 
 def test_inputs():
     import acceptance_data as collection
-    from prepare_acceptance_training import convert
+    from legacy_laya_v1.prepare_acceptance_training import convert
     assert (OUT/'evaluation_report.json').exists(), 'Complete the frozen evaluation first'
     labels = read_jsonl(OUT/'evaluation/test_labels.jsonl')
     inputs = {}

@@ -1,8 +1,4 @@
-"""Build a versioned acceptance dataset without changing collection artifacts.
-
-Labels here are deliberately named weak feedback labels. No claim of semantic
-annotation is made. The held-out test remains unscored and unexported.
-"""
+"""Prepare changed-only binary COMET labels; exact no-ops are retained in audit."""
 import argparse
 from collections import Counter
 from datetime import datetime, timezone
@@ -12,167 +8,207 @@ import math
 from pathlib import Path
 import shutil
 import tempfile
+import unicodedata
 
-import acceptance_data as collection
+import laya_acceptance_common as C
+from core.comet_feedback import from_config, validated_scores, validate_epsilon
+from legacy_laya_v1.prepare_acceptance_training import QUARANTINE
 
-ROOT = Path(__file__).resolve().parent
-DATA = ROOT/'runs/acceptance_data_v2'
-FOLDS = ('train','development','temperature_calibration','threshold_calibration')
-QUARANTINE = {
-    'wmt19_en_zh/acceptance_v1/train/018316': 'Reference missing source facts and containing different statements; original parquet pair verified.',
-    'wmt19_en_zh/acceptance_v1/train/032431': 'Reference omits the complete UK bond-yield sentence; original parquet pair verified.',
-    'wmt19_en_zh/acceptance_v1/train/035677': 'Reference adds a complete Cameron/red-card clause absent from source; original parquet pair verified.',
-}
+FOLDS = ('train', 'development', 'temperature_calibration', 'decision_diagnostics')
 
 
 def read_jsonl(path):
-    with path.open() as f:
-        return [json.loads(s) for s in f if s.strip()]
+    return C.read_jsonl(path)
+
+
+def norm(text):
+    return ''.join(unicodedata.normalize('NFKC', text).casefold().split())
+
+
+def source_key(text):
+    return hashlib.sha256(norm(text).encode()).hexdigest()
 
 
 def pair_id(row):
-    raw = json.dumps([row['source'],row['before'],row['candidate']],ensure_ascii=False,separators=(',',':'))
-    return hashlib.sha256(raw.encode()).hexdigest()
+    return hashlib.sha256(json.dumps([row['source'], row['before'], row['candidate']],
+                                    ensure_ascii=False, separators=(',', ':')).encode()).hexdigest()
 
 
 def classify(delta, epsilon):
-    if not math.isfinite(delta) or not 0 < epsilon < 1:
-        raise ValueError('delta must be finite and epsilon must be in (0,1)')
-    return 'Better' if delta > epsilon else 'Worse' if delta < -epsilon else 'Tie'
+    epsilon = validate_epsilon(epsilon)
+    if not math.isfinite(delta):
+        raise ValueError('Feedback delta must be finite')
+    return 'Accept' if delta > epsilon else 'Reject'
 
 
 def convert(row, epsilon=None):
-    """Whitelist only inference-available fields into the model input."""
-    item = {'id':pair_id(row), 'input':{'source':row['source'], 'current':row['before'], 'candidate':row['candidate']}}
+    result = {'id': pair_id(row), 'input': {'source': row['source'], 'current': row['before'], 'candidate': row['candidate']}}
+    C.require_changed_pairs([result])
     if epsilon is not None:
-        item['label'] = classify(row['delta'],epsilon)
-    return item
-
-
-def swap_training_item(item):
-    """Optional training-only augmentation; never apply to calibration/test."""
-    result = {'id':item['id']+':swapped', 'input':{'source':item['input']['source'],
-              'current':item['input']['candidate'], 'candidate':item['input']['current']}}
-    if 'label' in item:
-        result['label'] = {'Better':'Worse','Worse':'Better','Tie':'Tie'}[item['label']]
+        result['label'] = classify(row['delta'], epsilon)
     return result
 
 
+def map_legacy_label(label):
+    """Semantic mapping for audits only; formal training recomputes COMET labels."""
+    if label not in {'Better', 'Tie', 'Worse'}:
+        raise ValueError('Uncertain/missing legacy labels must not be silently mapped')
+    return 'Accept' if label == 'Better' else 'Reject'
+
+
+def swap_training_item(item, *, delta=None, epsilon=None):
+    if delta is None or epsilon is None:
+        raise ValueError('A Reject label alone cannot determine the swapped label; raw offline delta and epsilon are required')
+    return {'id': item['id'] + ':swapped',
+            'input': {'source': item['input']['source'], 'current': item['input']['candidate'], 'candidate': item['input']['current']},
+            'label': classify(-delta, epsilon)}
+
+
 def write_jsonl(path, rows):
-    path.parent.mkdir(parents=True,exist_ok=True)
-    with path.open('w') as f:
-        for row in rows:
-            f.write(json.dumps(row,ensure_ascii=False,allow_nan=False)+'\n')
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(''.join(json.dumps(r, ensure_ascii=False, allow_nan=False) + '\n' for r in rows))
 
 
-def build(output, epsilon=None):
+def build_dataset(folds, references, feedback, output, epsilon, *, protected_sources=(), frozen_checkpoint=None):
+    """Feedback stays in audit sidecars. Never use old delta/labels to select pairs."""
+    epsilon = validate_epsilon(epsilon)
+    output = Path(output)
     if output.exists():
         raise FileExistsError(f'Refusing to overwrite dataset: {output}')
-    collection.prepare()  # original manifest/library integrity
-    review_path = DATA/'label_preparation/assistant_review.json'
-    review = json.loads(review_path.read_text())
-    assert collection.digest(DATA/'train_margin_review.json') == review['review_source_sha256']
-    manifests = {fold:{r.sample_id:r for r in collection.read_manifest(DATA/f'{fold}_manifest.jsonl')} for fold in FOLDS}
-    cleaned = {}; exclusions=[]
-    for fold in FOLDS:
-        rows = read_jsonl(DATA/'pairs'/f'{fold}.jsonl')
-        kept=[]; seen=set()
+    if not folds or set(folds) - set(FOLDS) - {'test'}:
+        raise ValueError('Unknown or empty split specification')
+    if feedback.metric != 'comet':
+        raise ValueError('Binary labels require explicit COMET feedback')
+    feedback_meta = dict(feedback.metadata, epsilon=epsilon)
+    frozen_cfg = None
+    if 'test' in folds:
+        if frozen_checkpoint is None:
+            raise ValueError('Test feedback remains sealed until a binary checkpoint is frozen')
+        frozen_cfg = C.validate_checkpoint(frozen_checkpoint)
+        if frozen_cfg.get('label_feedback') != feedback_meta:
+            raise ValueError('Test epsilon/feedback must match the already frozen training protocol')
+    protected = {source_key(s) for s in protected_sources}
+    # Validate all sources BEFORE any quality scoring or label construction.
+    keys = {}
+    prepared = {}
+    exclusions = []
+    for fold, rows in folds.items():
+        keys[fold] = set()
+        prepared[fold] = []
+        seen = set()
         for row in rows:
-            ref=manifests[fold][row['sample_id']]
-            assert row['source']==ref.source
-            assert math.isfinite(row['delta'])
-            assert abs(row['delta']-(row['score_candidate']-row['score_before'])) < 1e-12
-            key=pair_id(row)
-            assert key not in seen, f'Duplicate exported pair {key}'
-            seen.add(key)
-            why = None
-            if not row['valid']:
-                why='invalid_candidate:'+row['invalid_reason']
-            elif row['sample_id'] in QUARANTINE:
-                assert fold=='train'
-                why='reference_alignment:'+QUARANTINE[row['sample_id']]
-            if why:
-                exclusions.append({'id':key,'fold':fold,'sample_id':row['sample_id'],'reason':why})
-            else:
-                assert row['source'].strip() and row['before'].strip() and row['candidate'].strip()
-                if row['before']==row['candidate']:
-                    assert row['delta']==0
-                kept.append(row)
-        cleaned[fold]=kept
-    source_keys={fold:{collection.norm(r['source']) for r in rows} for fold,rows in cleaned.items()}
-    for a in FOLDS:
-        for b in FOLDS:
-            if a != b: assert not source_keys[a] & source_keys[b]
-    audit=json.loads((DATA/'audit_summary.json').read_text())
-    assert audit['cross_fold_overlap']==audit['memory_overlap']==0
-    assert not (DATA/'pairs/test.jsonl').exists(), 'Test feedback should remain sealed'
-    output.parent.mkdir(parents=True,exist_ok=True)
-    staging=Path(tempfile.mkdtemp(prefix=output.name+'.staging.',dir=output.parent))
+            sid = row['sample_id']
+            ref = references[fold][sid]
+            if row['source'] != ref['source']:
+                raise ValueError('Source/manifest mismatch')
+            key = source_key(row['source'])
+            if key in protected:
+                raise ValueError('Source overlaps the protected test/initial memory set')
+            keys[fold].add(key)
+            if not row.get('valid', False):
+                exclusions.append({'sample_id': sid, 'fold': fold, 'reason': 'invalid_candidate'})
+                continue
+            if sid in QUARANTINE:
+                exclusions.append({'sample_id': sid, 'fold': fold, 'reason': QUARANTINE[sid]})
+                continue
+            if not all(isinstance(row[k], str) and row[k].strip() for k in ('source', 'before', 'candidate')):
+                raise ValueError('Empty/nontext pair')
+            pid = pair_id(row)
+            if pid in seen:
+                continue
+            seen.add(pid)
+            prepared[fold].append((row, ref['reference']))
+    for a in keys:
+        for b in keys:
+            if a != b and keys[a] & keys[b]:
+                raise ValueError(f'Source leakage between {a} and {b}')
+    if frozen_cfg:
+        prior = set(frozen_cfg.get('seen_source_hashes', []))
+        if not prior:
+            raise ValueError('Frozen checkpoint must record its training/development source identities')
+        if keys['test'] & prior:
+            raise ValueError('Test sources overlap checkpoint development data')
+    output.parent.mkdir(parents=True, exist_ok=True)
+    staging = Path(tempfile.mkdtemp(prefix=output.name + '.staging.', dir=output.parent))
     try:
-        statistics={}
-        for fold,rows in cleaned.items():
-            items=[convert(row,epsilon) for row in rows]
-            write_jsonl(staging/f'{fold}.jsonl',items)
-            # Provenance/feedback sidecars must never be passed as model features.
-            write_jsonl(staging/'audit'/f'{fold}.jsonl',[
-                {'id':pair_id(r),'sample_id':r['sample_id'],'state_index':r['state_index'],'slot':r['slot'],
-                 'temperature':r['temperature'],'delta':r['delta'],'score_before':r['score_before'],
-                 'score_candidate':r['score_candidate'],'identical':r['identical']} for r in rows])
-            statistics[fold]={'pairs':len(rows),'sources':len(source_keys[fold]),
-                              'changed_pairs':sum(not r['identical'] for r in rows),
-                              'class_counts':dict(Counter(i['label'] for i in items)) if epsilon is not None else None}
-            # Re-read persisted file and audit schema, order and label-input separation.
-            persisted=read_jsonl(staging/f'{fold}.jsonl')
-            assert len(persisted)==len(rows)
-            for item,row in zip(persisted,rows):
-                assert item==convert(row,epsilon)
-                assert set(item['input'])=={'source','current','candidate'}
-                assert set(item)==({'id','input','label'} if epsilon is not None else {'id','input'})
-        write_jsonl(staging/'audit/exclusions.jsonl',exclusions)
-        (staging/'test_sealed.json').write_text(json.dumps({
-            'status':'sealed_until_model_and_thresholds_frozen',
-            'raw_directory':str(DATA/'raw/test'),
-            'manifest_sha256':collection.digest(DATA/'test_manifest.jsonl'),
-            'sources':400,'unique_valid_pairs_from_generation_audit':793,
-            'feedback_computed':False,'labels_exported':False},indent=2))
-        metadata={'created_at_utc':datetime.now(timezone.utc).isoformat(),
-                  'status':'ready_for_weak_feedback_training' if epsilon is not None else 'cleaned_pending_label_rule',
-                  'label_semantics':'existing sentence feedback difference, NOT human or semantic ground truth',
-                  'semantic_label_quality_validated':False,
-                  'epsilon':epsilon,'feedback_scale':'Scorer.primary/100',
-                  'decision_rule':'Better if delta>epsilon; Worse if delta< -epsilon; Tie otherwise',
-                  'tie_definition':'within proxy-feedback margin; not a guarantee of semantic equivalence',
-                  'input_schema':['source','current','candidate'],
-                  'label_order':['Better','Tie','Worse'],
-                  'training_augmentation':'none materialized; optional train-only swap helper; never change held-out distributions',
-                  'class_weights':'not applied; use training counts only if weighting is later chosen',
-                  'statistics':statistics,'exclusions':len(exclusions),'known_reference_issues':QUARANTINE,
-                  'review_type':review['reviewer'],'review_hash':collection.digest(review_path),
-                  'input_hashes':{f'{f}.jsonl':collection.digest(DATA/'pairs'/f'{f}.jsonl') for f in FOLDS},
-                  'collection_protocol_sha256':collection.digest(DATA/'protocol.json'),
-                  'exporter_sha256':collection.digest(Path(__file__)),
-                  'checks':['original input hashes PASS','pair dedup PASS','numeric delta consistency PASS',
-                            'source split isolation PASS','model feature whitelist PASS','test seal PASS',
-                            'invalid/quarantined samples removed PASS','persisted round trip PASS'],
-                  'output_hashes':{str(p.relative_to(staging)):collection.digest(p) for p in sorted(staging.rglob('*.json*'))}}
-        (staging/'dataset.json').write_text(json.dumps(metadata,ensure_ascii=False,indent=2))
-        (staging/'README.md').write_text(
-            '# Acceptance dataset\n\n'+metadata['status']+'\n\n'
-            'Read dataset.json for the frozen label rule, class counts and integrity hashes. '
-            'Model features are exactly input.source, input.current, input.candidate. '
-            'Only the top-level label is a training target. Never concatenate audit/ sidecars into prompts. '
-            'The feedback proxy has known lexical and reference-alignment noise; AI-assisted review is not human annotation. '
-            'Only known training alignment problems were quarantined, not an exhaustive semantic cleaning of the corpus. '
-            'Test remains sealed; no test labels or scores are included. No verifier is trained by this export.\n')
+        stats = {}
+        for fold, pairs in prepared.items():
+            if not pairs:
+                raise ValueError('No valid pairs in split ' + fold)
+            changed, no_ops = [], []
+            for row, ref in pairs:
+                inputs = {'source': row['source'], 'current': row['before'], 'candidate': row['candidate']}
+                if C.is_noop(inputs):
+                    no_ops.append({'id': pair_id(row), 'sample_id': row['sample_id'],
+                                   'source_hash': source_key(row['source']), 'input': inputs,
+                                   'decision': 'Reject', 'reason': 'current_equals_candidate',
+                                   'decision_origin': 'deterministic_rule', 'used_for_model': False})
+                else:
+                    changed.append((row, ref))
+            inputs = [{'source': r['source'], 'current': r['before'], 'candidate': r['candidate'], 'reference': ref} for r, ref in changed]
+            scores = validated_scores(inputs, feedback.score_pairs(inputs)) if inputs else []
+            items, audit = [], []
+            for (row, _), score in zip(changed, scores):
+                item = convert(dict(row, delta=score['delta']), epsilon)
+                items.append(item)
+                audit.append({'id': item['id'], 'sample_id': row['sample_id'], 'source_hash': source_key(row['source']), **score})
+            write_jsonl(staging / f'{fold}.jsonl', items)
+            write_jsonl(staging / 'audit' / f'{fold}.jsonl', audit)
+            write_jsonl(staging / 'audit' / f'{fold}_no_ops.jsonl', no_ops)
+            stats[fold] = {'pairs': len(items), 'sources': len({r['source_hash'] for r in audit}),
+                           'labels': dict(Counter(r['label'] for r in items)),
+                           'valid_unique_pairs': len(pairs), 'no_op_pairs': len(no_ops),
+                           'no_op_sources': len({r['source_hash'] for r in no_ops}),
+                           'sources_checked_for_isolation': len(keys[fold])}
+        write_jsonl(staging / 'audit/exclusions.jsonl', exclusions)
+        meta = {'created_at_utc': datetime.now(timezone.utc).isoformat(), 'decision_schema': C.SCHEMA,
+                'input_schema': list(C.INPUT_FIELDS), 'label_order': C.LABELS, 'label_feedback': feedback_meta,
+                'model_population': C.MODEL_POPULATION, 'no_op_rule': C.NO_OP_RULE,
+                'label_rule': 'Accept iff delta_COMET > epsilon; Reject otherwise',
+                'runtime_rule': 'raw binary classification; epsilon is not a runtime acceptance parameter',
+                'augmentation': 'option-order permutation only; no Current/Candidate swap',
+                'source_hashes': {f: sorted(v) for f, v in keys.items()}, 'statistics': stats,
+                'test': 'labelled after checkpoint freeze' if frozen_cfg else 'sealed; not scored or exported',
+                'frozen_checkpoint_sha256': C.digest(Path(frozen_checkpoint) / 'model.safetensors') if frozen_cfg else None,
+                'output_hashes': {str(p.relative_to(staging)): C.digest(p) for p in staging.rglob('*.jsonl')}}
+        C.dump(staging / 'dataset.json', meta)
         staging.rename(output)
-        return metadata
+        return meta
     except BaseException:
         shutil.rmtree(staging)
         raise
 
-if __name__=='__main__':
-    p=argparse.ArgumentParser()
-    p.add_argument('--output',type=Path,required=True)
-    p.add_argument('--epsilon',type=float)
-    args=p.parse_args()
-    print(json.dumps(build(args.output,args.epsilon),ensure_ascii=False,indent=2))
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--collection', type=Path, default=C.COLLECTION)
+    p.add_argument('--output', type=Path, default=C.DATA)
+    p.add_argument('--epsilon', type=float, help='Offline COMET label tolerance; never used at inference')
+    p.add_argument('--config', type=Path, default=C.ROOT / 'configs/laya_binary_v1.json')
+    p.add_argument('--folds', nargs='+', choices=list(FOLDS) + ['test'], default=list(FOLDS))
+    p.add_argument('--frozen-checkpoint', type=Path, help='Required before labelling test')
+    args = p.parse_args()
+    raw, refs = {}, {}
+    for fold in args.folds:
+        old = 'threshold_calibration' if fold == 'decision_diagnostics' else fold
+        pairs_path = args.collection / 'pairs' / f'{old}.jsonl'
+        if fold == 'test' and not pairs_path.exists():
+            from acceptance_data import unique_rows
+            records = (json.loads(p.read_text()) for p in sorted((args.collection / 'raw/test').glob('*.json')))
+            raw[fold] = list(unique_rows(records))
+        else:
+            raw[fold] = read_jsonl(pairs_path)
+        refs[fold] = {r['sample_id']: r for r in read_jsonl(args.collection / f'{old}_manifest.jsonl')}
+    memory = read_jsonl(args.collection / 'initial_memory.jsonl')
+    protected = [r['source_input'] for r in memory]
+    if 'test' not in args.folds:
+        protected += [r['source'] for r in read_jsonl(args.collection / 'test_manifest.jsonl')]
+    cfg = json.loads(args.config.read_text())
+    epsilon = cfg['label_epsilon'] if args.epsilon is None else args.epsilon
+    result = build_dataset(raw, refs, from_config(cfg['feedback']), args.output, epsilon,
+                           protected_sources=protected, frozen_checkpoint=args.frozen_checkpoint)
+    print(json.dumps(result['statistics'], ensure_ascii=False, indent=2))
+
+
+if __name__ == '__main__':
+    main()

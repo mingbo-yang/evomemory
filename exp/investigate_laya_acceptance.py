@@ -9,7 +9,7 @@ import numpy as np
 import pyarrow.parquet as pq
 import torch
 from sklearn.metrics import accuracy_score, confusion_matrix
-from laya_acceptance_common import *
+from legacy_laya_v1.laya_acceptance_common import *
 import laya
 
 DEST = OUT/'investigation'

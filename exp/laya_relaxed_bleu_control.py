@@ -2,7 +2,7 @@
 import copy
 import json
 import torch
-from laya_relaxed_flow import OUT,MODEL_OUT,Generator,Verifier,Flow,prepare,read_manifest,status
+from legacy_laya_v1.laya_relaxed_flow import OUT,MODEL_OUT,Generator,Verifier,Flow,prepare,read_manifest,status
 from semantic_label_common import dump
 
 

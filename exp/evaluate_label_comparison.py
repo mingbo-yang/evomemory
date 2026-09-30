@@ -8,7 +8,7 @@ import numpy as np
 import torch
 from scipy.optimize import minimize_scalar
 from sklearn.metrics import confusion_matrix,f1_score,roc_auc_score
-import laya_acceptance_common as C
+import legacy_laya_v1.laya_acceptance_common as C
 from semantic_label_common import OUT,ROOT,LABELS,dump,read_jsonl
 from train_label_comparison import ready,read_fold,resolved,utility,save
 

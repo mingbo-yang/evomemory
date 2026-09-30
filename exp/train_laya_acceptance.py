@@ -1,161 +1,154 @@
-"""Single-GPU adaptation of the official Laya RLCD notebook, with isolated evaluation."""
-import os
-os.environ['CUDA_DEVICE_ORDER']='PCI_BUS_ID'
-os.environ['CUDA_VISIBLE_DEVICES']='0'
-os.environ['TOKENIZERS_PARALLELISM']='false'
+"""Train Laya multilingual on binary action targets; no threshold search or answer swapping."""
 import argparse
 from collections import Counter
-from datetime import datetime,timezone
+from contextlib import nullcontext
+from datetime import datetime, timezone
 import json
 import math
 from pathlib import Path
 import random
-import shutil
-import subprocess
-import time
+
 import numpy as np
 import torch
-from safetensors.torch import load_file
-from laya_acceptance_common import *
-from laya.common import proper_reward
+import laya_acceptance_common as C
 
 
-def now():return datetime.now(timezone.utc).isoformat()
-
-
-def status(stage,**kw):dump(OUT/'status.json',{'stage':stage,'updated_at_utc':now(),**kw})
-
-
-def freeze_protocol():
-    OUT.mkdir(parents=True,exist_ok=True)
-    meta=json.loads((DATA/'dataset.json').read_text())
-    for name,h in meta['output_hashes'].items():assert digest(DATA/name)==h
-    p={'model':'convaiinnovations/laya-multilingual','base_revision':json.loads((BASE/'download_provenance.json').read_text())['revision'],
-       'vendor_commit':subprocess.check_output(['git','-C',str(VENDOR),'rev-parse','HEAD'],text=True).strip(),
-       'dataset_manifest_sha256':digest(DATA/'dataset.json'),'train_pairs':20002,'label_epsilon':.01,
-       'feedback_semantics':'weak original sentence-metric feedback; semantic reliability NOT validated',
-       'gpu':0,'seed':42,'epochs':4,'micro_batch':16,'effective_batch':64,
-       'lr_encoder':2.5e-5,'lr_head':1e-4,'weight_decay':.01,'max_len':1024,'head_max_len':256,
-       'training':'official Laya model + proper_reward + GRPO logit perturbation (G=4,sigma=.4 to .1) + CE guidance=1; single GPU bf16',
-       'sampling':'all train pairs once per epoch; shuffled; 50% before/after swap with label reversal; random option permutation',
-       'class_balance':'square-root inverse effective class-frequency loss weights, symmetric Better/Worse after swapping; no heldout resampling',
-       'checkpoint_selection':'development precision among top ceil(10% of all dev pairs) eligible pBetter ranks; tie-break mean delta then changed-pair AUC',
-       'probability_calibration':'only temperature_calibration; scalar T minimizes NLL in [.1,10]',
-       'threshold_calibration':'only threshold_calibration; max coverage satisfying >=10% coverage, >=80% precision(delta>.01), positive mean delta',
-       'p_better_grid':[.34,.4,.45,.5,.55,.6,.65,.7,.75,.8,.85,.9,.95,.98],
-       'p_worse_max_grid':[1.,.3,.2,.1,.05],
-       'eligibility':'nonidentical, nonempty candidate, normalized length<=1.5*current+8',
-       'test_gate':'coverage>=.10 AND precision>=.80 AND mean delta>0 AND source-bootstrap 95% lower mean delta>0; zero acceptance fails',
-       'failure_policy':'if verifier gate fails, do not run static/online main experiment',
-       'test_access':'only after selected checkpoint, scalar temperatures and operating points are persisted in evaluation_lock.json',
-       'controls':['unmodified laya-multilingual','fine-tuned laya-multilingual'],
-       'precision_reporting':'Better requires delta>.01; also report any-negative accept count and metric gain',
-       'script_sha256':digest(Path(__file__)),'adapter_sha256':digest(ROOT/'laya_acceptance_common.py')}
-    path=OUT/'training_protocol.json'
-    if path.exists():assert json.loads(path.read_text())==p,'Protocol changed; use a new version'
-    else:dump(path,p)
-    return p
-
-
-def rlcd_loss(model,batch,sigma,weights):
-    with torch.autocast('cuda',dtype=torch.bfloat16):logits,_=forward(model,batch)
-    logits=logits.float();mask=batch['marker_mask'];target=batch['target'];k=mask.sum(-1,keepdim=True).float()
-    eps=torch.randn((4,)+logits.shape,device='cuda')*sigma*mask
-    eps=(eps-eps.sum(-1,keepdim=True)/k)*mask
-    z=logits.detach().unsqueeze(0)+eps
-    q=torch.softmax(z.masked_fill(~mask,-1e4),-1)
+def rlcd_loss(model, batch, sigma, weights):
+    """Retain the existing RLCD + CE objective, now with two option targets."""
+    from laya.common import proper_reward
+    device = batch['input_ids'].device
+    amp = torch.autocast('cuda', dtype=torch.bfloat16) if device.type == 'cuda' else nullcontext()
+    with amp:
+        logits, _ = C.forward(model, batch)
+    logits = logits.float()
+    mask, target = batch['marker_mask'], batch['target']
+    if logits.shape[-1] != 2 or target.shape != logits.shape:
+        raise ValueError('Binary training requires exactly two logits and targets')
+    k = mask.sum(-1, keepdim=True).float()
+    noise = torch.randn((4,) + logits.shape, device=device) * sigma * mask
+    noise = (noise - noise.sum(-1, keepdim=True) / k) * mask
+    z = logits.detach().unsqueeze(0) + noise
+    q = torch.softmax(z.masked_fill(~mask, -1e4), -1)
     with torch.no_grad():
-        reward=proper_reward(q,target.unsqueeze(0),batch['qtype'],mask,w_sph=.75,w_rps=1.)
-        adv=reward-reward.mean(0,keepdim=True)
-        adv=adv/(adv.std()+1e-6)
-    logp=-(((z-logits.unsqueeze(0))**2)*mask).sum(-1)/(2*sigma**2)
-    loss_rl=-(adv*logp).mean(0)
-    loss_ce=-(target*torch.log_softmax(logits.masked_fill(~mask,-1e4),-1)).sum(-1)
-    w=torch.tensor([weights[it['semantic_label']] for it in batch['meta']],device='cuda')
-    return ((loss_rl+loss_ce)*w).mean(),loss_ce.mean(),reward.mean()
+        reward = proper_reward(q, target.unsqueeze(0), batch['qtype'], mask, w_sph=.75, w_rps=1.)
+        advantage = reward - reward.mean(0, keepdim=True)
+        advantage /= advantage.std() + 1e-6
+    logp = -(((z - logits.unsqueeze(0)) ** 2) * mask).sum(-1) / (2 * sigma ** 2)
+    rl = -(advantage * logp).mean(0)
+    ce = -(target * torch.log_softmax(logits.masked_fill(~mask, -1e4), -1)).sum(-1)
+    weight = torch.tensor([weights[it['semantic_label']] for it in batch['meta']], device=device)
+    return ((rl + ce) * weight).mean(), ce.mean(), reward.mean()
 
 
-def train(smoke=False):
-    p=freeze_protocol()
-    random.seed(SEED);np.random.seed(SEED);torch.manual_seed(SEED);torch.cuda.manual_seed_all(SEED)
-    torch.set_num_threads(4)
-    tok=get_tokenizer()
-    rows,delta,_=load_fold('train');dev,dev_delta,_=load_fold('development')
-    status('encoding')
-    tr=EncodedPairs(rows[:64] if smoke else rows,tok,allow_swap=True)
-    de=EncodedPairs(dev[:16] if smoke else dev,tok)
-    counts=Counter(r['label'] for r in rows)
-    f=np.array([(counts['Better']+counts['Worse'])/2,counts['Tie'],(counts['Better']+counts['Worse'])/2])
-    weights=1/np.sqrt(f);weights=weights/np.sum(weights*f/f.sum())
-    dump(OUT/('smoke_encoding.json' if smoke else 'encoding_audit.json'),{'max_train_tokens':tr.max_len,'max_dev_tokens':de.max_len,
-               'truncated':0,'class_weights':weights.tolist(),'parameter_source':p['base_revision']})
-    model,cfg=load_model();model.to('cuda')
-    model.encoder.gradient_checkpointing_enable(gradient_checkpointing_kwargs={'use_reentrant':False})
-    model.head_checkpointing=True
-    # The unused escalation head is not part of this acceptance-only experiment.
-    for param in model.act_head.parameters():param.requires_grad_(False)
-    enc=[v for name,v in model.named_parameters() if name.startswith('encoder.') and v.requires_grad]
-    head=[v for name,v in model.named_parameters() if not name.startswith('encoder.') and v.requires_grad]
-    opt=torch.optim.AdamW([{'params':enc,'lr':p['lr_encoder']},{'params':head,'lr':p['lr_head']}],weight_decay=p['weight_decay'])
-    total_steps=math.ceil(len(tr.rows)/64)*(1 if smoke else p['epochs'])
-    scheduler=torch.optim.lr_scheduler.CosineAnnealingLR(opt,T_max=total_steps,eta_min=1e-6)
-    if smoke:
-        model.train();before=model.scorer[-1].weight.detach().clone()
-        batch=pack([tr.item(i,epoch=0) for i in range(8)],tok)
-        loss,ce,reward=rlcd_loss(model,batch,.4,weights)
-        assert torch.isfinite(loss)
-        loss.backward();norm=torch.nn.utils.clip_grad_norm_(model.parameters(),1.)
-        assert torch.isfinite(norm)
-        opt.step()
-        assert not torch.equal(before,model.scorer[-1].weight)
-        z=infer(model,de)
-        result={'loss':float(loss.detach()),'ce':float(ce.detach()),'reward':float(reward),'grad_norm':float(norm),
-                'weights_updated':True,'finite_predictions':bool(np.isfinite(z).all()),
-                'parameter_count':sum(t.numel() for t in model.parameters()),'cuda_peak_GB':torch.cuda.max_memory_allocated()/1e9}
-        dump(OUT/'smoke_result.json',result);print(json.dumps(result),flush=True)
-        return
-    if (OUT/'best_selection.json').exists():raise RuntimeError('Training already has results; avoid overwriting an experiment')
-    base_z=infer(model,de)
-    base_metrics=metrics(dev,base_z,dev_delta)
-    dump(OUT/'base_development.json',base_metrics)
-    np.save(OUT/'base_development_logits.npy',base_z)
-    history=[];best_key=None;start=time.time();updates=0
-    for epoch in range(p['epochs']):
-        model.train();indices=list(range(len(tr.rows)));random.Random(SEED+epoch).shuffle(indices)
-        sigma=.4+(.1-.4)*epoch/max(1,p['epochs']-1)
-        ce_sum=loss_sum=seen=0.
-        status('training',epoch=epoch+1,total_epochs=p['epochs'],updates=updates)
-        for start_idx in range(0,len(indices),64):
-            group=indices[start_idx:start_idx+64];opt.zero_grad(set_to_none=True)
-            for sub in range(0,len(group),16):
-                ids=group[sub:sub+16];batch=pack([tr.item(i,epoch=epoch) for i in ids],tok)
-                loss,ce,reward=rlcd_loss(model,batch,sigma,weights)
-                assert torch.isfinite(loss),'Nonfinite training loss'
-                (loss*(len(ids)/len(group))).backward()
-                ce_sum+=float(ce.detach())*len(ids);loss_sum+=float(loss.detach())*len(ids);seen+=len(ids)
-            grad_norm=torch.nn.utils.clip_grad_norm_(model.parameters(),1.)
-            assert torch.isfinite(grad_norm),'Nonfinite gradients'
-            opt.step();scheduler.step();updates+=1
-            if updates%25==0:
-                progress={'epoch':epoch+1,'total_epochs':p['epochs'],'updates':updates,'total_updates':total_steps,
-                          'examples_seen_epoch':int(seen),'train_ce':ce_sum/seen,'train_loss':loss_sum/seen,
-                          'elapsed_s':time.time()-start,'cuda_peak_GB':torch.cuda.max_memory_allocated()/1e9}
-                status('training',**progress);print(json.dumps(progress),flush=True)
-        z=infer(model,de);result=metrics(dev,z,dev_delta);key=selection_key(result)
-        entry={'epoch':epoch+1,'ce':ce_sum/seen,'loss':loss_sum/seen,'development':result,'elapsed_s':time.time()-start}
-        history.append(entry);dump(OUT/'history.json',history)
-        np.save(OUT/f'development_logits_epoch{epoch+1}.npy',z)
-        latest=OUT/'checkpoint_latest';save_checkpoint(model,cfg,tok,latest)
-        torch.save({'epoch':epoch+1,'optimizer':opt.state_dict(),'scheduler':scheduler.state_dict(),
-                    'torch_rng':torch.get_rng_state(),'cuda_rng':torch.cuda.get_rng_state(),'updates':updates},latest/'training_state.pt')
-        if best_key is None or key>best_key:
-            best_key=key;save_checkpoint(model,cfg,tok,OUT/'best_uncalibrated')
-            dump(OUT/'best_selection.json',{'epoch':epoch+1,'selection_key':list(key),'development':result,
-                                          'checkpoint_sha256':digest(OUT/'best_uncalibrated/model.safetensors')})
-        print('EPOCH_COMPLETE '+json.dumps(entry),flush=True)
-    status('training_complete',epochs=p['epochs'],elapsed_s=time.time()-start)
+def train(args):
+    meta = json.loads((args.data / 'dataset.json').read_text())
+    if meta.get('label_feedback', {}).get('metric') != 'comet':
+        raise ValueError('Train on the binary COMET-labelled dataset')
+    rows, _, _ = C.load_fold('train', args.data)
+    dev, delta, _ = C.load_fold('development', args.data)
+    if min(args.epochs, args.batch_size, args.effective_batch) < 1:
+        raise ValueError('Positive training sizes required')
+    counts = Counter(r['label'] for r in rows)
+    if any(counts[label] == 0 for label in C.LABELS):
+        raise ValueError('Training data must contain both Accept and Reject')
+    if args.output.exists():
+        raise FileExistsError('Use a new binary model directory; never overwrite an old experiment')
+    args.output.mkdir(parents=True)
+    protocol = {'decision_schema': C.SCHEMA, 'labels': C.LABELS, 'label_feedback': meta['label_feedback'],
+                'model_population': C.MODEL_POPULATION, 'no_op_rule': C.NO_OP_RULE,
+                'dataset_sha256': C.digest(args.data / 'dataset.json'), 'data': str(args.data.resolve()),
+                'base': str(args.base.resolve()), 'seed': args.seed, 'epochs': args.epochs,
+                'micro_batch': args.batch_size, 'effective_batch': args.effective_batch,
+                'training': 'RLCD + CE; two options; random option order; no answer swapping',
+                'selection': 'development macro F1, then accuracy; no runtime thresholds',
+                'probabilities': 'diagnostic only; no mandatory calibration phase',
+                'created_at_utc': datetime.now(timezone.utc).isoformat()}
+    C.dump(args.output / 'training_protocol.json', protocol)
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    if args.device.startswith('cuda'):
+        torch.cuda.manual_seed_all(args.seed)
+    tok = C.get_tokenizer(args.base)
+    tr, de = C.EncodedPairs(rows, tok), C.EncodedPairs(dev, tok)
+    model, cfg = C.load_model(args.base, initialization=True)
+    cfg['seen_source_hashes'] = sorted(set().union(*(set(v) for v in meta['source_hashes'].values())))
+    model.to(args.device)
+    model.encoder.gradient_checkpointing_enable(gradient_checkpointing_kwargs={'use_reentrant': False})
+    model.head_checkpointing = True
+    for parameter in model.act_head.parameters():
+        parameter.requires_grad_(False)
+    encoder = [v for n, v in model.named_parameters() if n.startswith('encoder.') and v.requires_grad]
+    head = [v for n, v in model.named_parameters() if not n.startswith('encoder.') and v.requires_grad]
+    optimizer = torch.optim.AdamW([{'params': encoder, 'lr': 2.5e-5}, {'params': head, 'lr': 1e-4}], weight_decay=.01)
+    frequency = np.array([counts[label] for label in C.LABELS], dtype=float)
+    weights = 1 / np.sqrt(frequency)
+    weights /= np.sum(weights * frequency / frequency.sum())
+    steps = math.ceil(len(rows) / args.effective_batch) * args.epochs
+    schedule = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=steps, eta_min=1e-6)
+    best = None
+    history = []
+    completed_steps = 0
+    for epoch in range(args.epochs):
+        model.train()
+        order = list(range(len(rows)))
+        random.Random(args.seed + epoch).shuffle(order)
+        sigma = .4 - .3 * epoch / max(1, args.epochs - 1)
+        for start in range(0, len(order), args.effective_batch):
+            group = order[start:start + args.effective_batch]
+            optimizer.zero_grad(set_to_none=True)
+            for sub in range(0, len(group), args.batch_size):
+                indices = group[sub:sub + args.batch_size]
+                batch = C.pack([tr.item(i, epoch=epoch) for i in indices], tok, args.device)
+                loss, _, _ = rlcd_loss(model, batch, sigma, weights)
+                if not torch.isfinite(loss):
+                    raise ValueError('Nonfinite binary training loss')
+                (loss * len(indices) / len(group)).backward()
+            norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 1.)
+            if not torch.isfinite(norm):
+                raise ValueError('Nonfinite training gradient')
+            optimizer.step()
+            schedule.step()
+            completed_steps += 1
+            if completed_steps == 1 or completed_steps % 25 == 0 or start + len(group) == len(order):
+                progress = {'epoch': epoch + 1, 'epochs': args.epochs,
+                            'epoch_pairs_completed': start + len(group), 'epoch_pairs_total': len(order),
+                            'optimizer_steps_completed': completed_steps, 'optimizer_steps_total': steps,
+                            'last_micro_batch_loss': float(loss.detach().cpu()),
+                            'updated_at_utc': datetime.now(timezone.utc).isoformat()}
+                C.dump(args.output / 'training_progress.json', progress)
+                print(json.dumps({'progress': progress}), flush=True)
+        logits = C.infer(model, de, args.batch_size)
+        result = C.metrics(dev, logits, delta)
+        history.append({'epoch': epoch + 1, 'development': result})
+        C.dump(args.output / 'history.json', history)
+        key = C.selection_key(result)
+        if best is None or key > best:
+            best = key
+            C.save_checkpoint(model, cfg, tok, args.output / 'best', meta['label_feedback'])
+            C.dump(args.output / 'best_selection.json', history[-1])
+        print(json.dumps(history[-1], ensure_ascii=False), flush=True)
+    C.dump(args.output / 'evaluation_lock.json', {
+        'decision_schema': C.SCHEMA, 'checkpoint_sha256': C.digest(args.output / 'best/model.safetensors'),
+        'config_sha256': C.digest(args.output / 'best/rl_agent_config.json'),
+        'label_feedback': meta['label_feedback'], 'decision_rule': 'raw argmax; exact tie Reject',
+        'test_used_for_selection': False, 'runtime_thresholds': None})
+    return history
 
 
-if __name__=='__main__':
-    ap=argparse.ArgumentParser();ap.add_argument('--smoke',action='store_true');args=ap.parse_args()
-    train(args.smoke)
+def main():
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--data', type=Path, default=C.DATA)
+    p.add_argument('--output', type=Path, default=C.OUT)
+    p.add_argument('--base', type=Path, default=C.BASE)
+    p.add_argument('--device', default='cuda')
+    p.add_argument('--epochs', type=int, default=4)
+    p.add_argument('--batch-size', type=int, default=16)
+    p.add_argument('--effective-batch', type=int, default=64)
+    p.add_argument('--seed', type=int, default=42)
+    args = p.parse_args()
+    train(args)
+
+
+if __name__ == '__main__':
+    main()

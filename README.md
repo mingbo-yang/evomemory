@@ -8,13 +8,13 @@
 
 | 路径 | 用途 |
 | --- | --- |
-| [exp/laya_acceptance_common.py](exp/laya_acceptance_common.py) | Laya multilingual 权重加载、输入构造、Better/Tie/Worse 标签与推理工具 |
+| [exp/laya_acceptance_common.py](exp/laya_acceptance_common.py) | Laya multilingual 权重加载、输入构造、Accept/Reject 标签、输入隔离与两选项推理 |
 | [exp/laya_relaxed_flow.py](exp/laya_relaxed_flow.py) | `Verifier` 本地推理接口、候选生成、答案采纳与独立的延迟反馈入库 |
 | [exp/laya_relaxed_policy.py](exp/laya_relaxed_policy.py) | 上述流程实际调用的候选选择策略 |
-| [exp/train_laya_acceptance.py](exp/train_laya_acceptance.py) | Laya acceptance 训练入口 |
+| [exp/train_laya_acceptance.py](exp/train_laya_acceptance.py) | 从基础 Laya multilingual 训练二分类模型 |
 | [exp/train_label_comparison.py](exp/train_label_comparison.py) | 语义标签与 BLEU 标签的训练对比 |
 | [exp/evaluate_label_comparison.py](exp/evaluate_label_comparison.py) | 两个标签版本的评估 |
-| [exp/calibrate_laya_safe_acceptance.py](exp/calibrate_laya_safe_acceptance.py) | 独立的 Better 分类与分差校准检查 |
+| [exp/calibrate_laya_safe_acceptance.py](exp/calibrate_laya_safe_acceptance.py) | 历史三分类与阈值校准脚本，不用于当前主流程 |
 | [exp/acceptance_data.py](exp/acceptance_data.py) / [exp/prepare_acceptance_training.py](exp/prepare_acceptance_training.py) | 候选采集与训练数据准备 |
 | [exp/core/](exp/core/) | 经验结构、BM25/混合检索、控制器、反馈和实验流水线 |
 | [exp/run_experiment.py](exp/run_experiment.py) | 原有实验及消融入口；不等同于 Laya 专用流程 |
@@ -24,15 +24,19 @@
 
 项目实际微调和调用的判别模型名为 `laya-multilingual`。`Verifier` 在 Python 进程内加载权重并推理，并未部署一个独立的 JEV HTTP 接口。第三方 Laya 目录中出现的 JEV 名称可能属于上游对比研究，不代表本项目使用了该模型。
 
-## 此次快照的准确状态
+## 当前二分类方案
 
-本次发布保留本地已有实验逻辑，没有借上传修改算法或重新运行模型实验。
+当前协议见 [exp/reports/LAYA_BINARY_PROTOCOL.md](exp/reports/LAYA_BINARY_PROTOCOL.md)。Laya 只输入 Source、Current、Candidate，直接输出 Accept/Reject；不使用 `p_better`、`p_worse_max` 或其他运行时接受阈值。
 
-- `laya_relaxed_flow.py` 仍调用旧的概率阈值策略；之前运行采用 `P(Better) >= 0.275` 且 `P(Worse) <= 0.4`。它没有强制最高概率类别为 Better，可能接受 Tie/Worse 候选，这是已定位的问题。
-- `calibrate_laya_safe_acceptance.py` 已包含 Better 必须为最高概率类别的约束及可选分差，但尚未接入上述完整流程。
-- “直接分类为 Better 才替换当前答案”的完整流程修复及重新验证，仍待单独实施。测试通过不代表这项修复已完成，也不代表方法效果已获证明。
-- 答案采纳与经验入库是不同决策。`positive_memories` 对实际修改前后的答案计算事后反馈，不要求候选先被 verifier 接受；能够评价所有候选的实验环境是这一做法的前提。
-- 文档与脚本涉及不同历史版本，应分别解释结果，不能把旧 BERT、旧阈值和新分类规则的结果合并。
+- Current 与 Candidate 精确相同：程序直接 Reject，不调用 Laya；样本保留审计，但排除出主训练与分类评估。
+- 文本不同：用离线 COMET 差值构造标签，Δ > 0 为 Accept，Δ ≤ 0 为 Reject。发生改写但分数相同的候选仍保留为 Reject。
+- 正式执行按原始两选项分类采用或拒绝候选；概率只用于诊断。参考答案、反馈分数和检索经验不进入 Laya 输入。
+- 经验入库独立于 Acceptance。任务结束后，所有有效实际修改均可获得反馈；ΔCOMET > 0 的候选才有入库资格，包括被 Laya 拒绝的候选。
+- 旧三分类实现隔离在 `exp/legacy_laya_v1/`；旧权重不能直接作为二分类检查点加载。
+
+训练入口为 `exp/train_laya_acceptance.py`，分类评估入口为 `exp/evaluate_laya_acceptance.py`，标签导出入口为 `exp/prepare_acceptance_training.py`。`run_laya_acceptance_job.py` 顺序执行训练和开发集评估。新模型保存在本机 `model/laya-multilingual-accept-reject-v1/`，不上传模型权重或训练数据。
+
+2026-09-30 已启动 GPU 3 的真实 COMET 重标注和训练任务，按开发集 macro F1 选择四轮训练中的最佳检查点，冻结后再生成测试标签与评估。实验结果另行报告；回归测试通过不代表实际效果已验证。
 
 ## 环境与外部资源
 

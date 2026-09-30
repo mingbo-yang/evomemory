@@ -1,3 +1,13 @@
+# Binary acceptance update — 2026-09-30
+
+Current Laya task: Accept/Reject with raw two-option classification. Exact no-op candidates bypass Laya and are excluded from primary training/evaluation; changed candidates with equal COMET remain Reject. Both offline tolerances are zero. Prior three-class experiments are isolated under `exp/legacy_laya_v1/`.
+
+Validation: 60 tests and 14 subtests passed in the local experiment checkout, including reference isolation, no-op bypass, delayed memory admission and preservation of COMET virtual-environment/checkpoint symlinks. Static checks and patch whitespace checks passed. Source checksums match the synchronized local files; no weight, training-data or credential artifacts are included.
+
+Real GPU 3 labeling/training/frozen-test evaluation has started. Classification and end-to-end results are not claimed in this publication. Runtime output and model weights stay on the experiment server.
+
+---
+
 # 源码发布验证（2026-09-30）
 
 本次仅整理并上传 `aaai2027/exp` 及其代码依赖；未修改实验算法，未训练或调用模型，未启动 GPU 服务。所有检查在独立发布副本中进行。

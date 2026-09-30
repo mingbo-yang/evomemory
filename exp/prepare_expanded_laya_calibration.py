@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 from acceptance_data import norm, valid_candidate
-from laya_acceptance_common import digest, dump, get_tokenizer, read_jsonl, state_text
+from legacy_laya_v1.laya_acceptance_common import digest, dump, get_tokenizer, read_jsonl, state_text
 from semantic_label_common import OUT as MODEL
 
 ROOT = Path(__file__).resolve().parent
@@ -34,7 +34,7 @@ def make():
         blocked.update((norm(x['source']), norm(x['reference'])))
     tok = get_tokenizer()
     from laya.common import build_sequence
-    import laya_acceptance_common as C
+    import legacy_laya_v1.laya_acceptance_common as C
     prefix = max(len(build_sequence(tok, '', C.QUESTION, 1024, 256,
                                     option_order=list(order), state_ids=[])[0][:-1])
                  for order in [(0, 1, 2), (0, 2, 1), (1, 0, 2),

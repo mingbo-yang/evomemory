@@ -11,8 +11,8 @@ import random
 import time
 import numpy as np
 import torch
-import laya_acceptance_common as C
-from train_laya_acceptance import rlcd_loss
+import legacy_laya_v1.laya_acceptance_common as C
+from legacy_laya_v1.train_laya_acceptance import rlcd_loss
 from semantic_label_common import OUT,ROOT,LABELS,dump,read_jsonl
 
 

@@ -4,9 +4,9 @@ Raw trajectories are immutable per source. References are used only in export,
 after generation/state selection. No verifier or online memory is instantiated.
 """
 import os
-os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-os.environ['TOKENIZERS_PARALLELISM'] = 'false'
+os.environ.setdefault('CUDA_DEVICE_ORDER', 'PCI_BUS_ID')
+os.environ.setdefault('CUDA_VISIBLE_DEVICES', '0')
+os.environ.setdefault('TOKENIZERS_PARALLELISM', 'false')
 import argparse
 from collections import Counter
 from dataclasses import asdict

@@ -1,0 +1,39 @@
+{
+  "created_at_utc": "2026-09-30T13:11:15.666761+00:00",
+  "scope": "local implementation only; no GitHub changes",
+  "decision_schema": "laya-accept-reject-v1",
+  "label_epsilon": 0.0,
+  "epsilon_memory": 0.0,
+  "offline_tests": {
+    "passed": 51,
+    "subtests_passed": 9,
+    "warning": "existing BERT constant-input correlation warning"
+  },
+  "static_check": "passed",
+  "entrypoint_help_checks": 5,
+  "real_tokenizer_check": {
+    "options": 2,
+    "accept_target": [
+      1.0,
+      0.0
+    ],
+    "tokens": 94
+  },
+  "real_comet_scoring_run": false,
+  "real_model_training_run": false,
+  "real_rollout_run": false,
+  "source_sha256": {
+    "laya_acceptance_common.py": "ad26cd32a2b9813166b509862c703790dac8e9909972b6cf65d9d95c0ef0d544",
+    "laya_relaxed_policy.py": "b263c74af7afd99523d58fe7377b133d2e35b44d81916d997d0b7cb2927797dd",
+    "laya_relaxed_flow.py": "0772c5b843412f56f2bc49a679d131e787659f7688752637af01cd951cddac4d",
+    "prepare_acceptance_training.py": "bd01094bbaa9d4837dfe5f459af51d995abaf8900a0f2aed3679e8d0c82189f7",
+    "train_laya_acceptance.py": "ed0ed7b88ffc192065306bdf0af730e341eca7c08d54c1f5ee00cdede6cdaa1c",
+    "evaluate_laya_acceptance.py": "0a000c2939bb6b06c62da1ac444fdab15153a555e208354fb343a2a92b0d8c04",
+    "run_laya_acceptance_job.py": "54ed1a7ba9555e5c3d10d91acae89ca1d0a532f46f82da2635c7fa4352ebe354",
+    "run_laya_relaxed_job.py": "281c684e76c53960f52c6712512e2b1a61e7845a8a91f914f7c89aeeb5afebe7",
+    "core/comet_feedback.py": "d0100e4f406118d59957ad846a2fb91e3bb872edc23a929b5072f3184a62b068",
+    "core/comet_feedback_worker.py": "0887f45688a3b05ce73a5de20a4892a8d1d98720b7be16fe09faa0e16b7f4021",
+    "configs/laya_binary_v1.json": "194e2bc6c54ce305b5f8e3df4bb4d93c381c0700333957ba258e3b56e1bd7de3"
+  },
+  "rollback_source_snapshot": "/mnt/huawei/ymb/backups/laya-binary-migration-20260930T124518Z"
+}

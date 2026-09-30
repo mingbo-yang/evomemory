@@ -1,3 +1,5 @@
+> 当前 Laya 主方案已更新为 Accept/Reject，两个离线反馈容差均为 0。主训练与分类评估仅包含 Current ≠ Candidate；精确相同文本由程序直接 Reject 并保留审计，文本不同但 COMET 相同仍保留为 Reject。以 [LAYA_BINARY_PROTOCOL.md](reports/LAYA_BINARY_PROTOCOL.md) 为准；下文保留历史实验计划，旧概率阈值规则不适用于新二分类流程。
+
 # AAAI2027 经验驱动 Refinement —— 已批准方案 v5（重建件 / reconstruction）
 
 > **本文件是重建件，不是原始文件。** 仓库中从未存在过方案文档（`core/__init__.py:4` 引用的

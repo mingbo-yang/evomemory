@@ -6,7 +6,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 import acceptance_data as collection
 from core.scoring import Scorer
-from prepare_acceptance_training import read_jsonl, QUARANTINE
+from legacy_laya_v1.prepare_acceptance_training import read_jsonl, QUARANTINE
 
 
 def verify(path):

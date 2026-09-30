@@ -4,7 +4,7 @@ import json
 import numpy as np
 from sacrebleu.metrics import BLEU,CHRF
 import sacrebleu
-from laya_relaxed_flow import OUT,ROOT,MODEL_OUT,read_manifest,Scorer,TASK
+from legacy_laya_v1.laya_relaxed_flow import OUT,ROOT,MODEL_OUT,read_manifest,Scorer,TASK
 from semantic_label_common import dump
 
 

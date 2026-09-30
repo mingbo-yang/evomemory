@@ -4,7 +4,7 @@ import hashlib
 import json
 import time
 from pathlib import Path
-from laya_relaxed_flow import OUT
+from legacy_laya_v1.laya_relaxed_flow import OUT
 from semantic_label_common import request_local,combine,dump,read_jsonl
 
 

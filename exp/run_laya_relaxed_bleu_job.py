@@ -1,6 +1,6 @@
 from pathlib import Path
 import os,signal,subprocess,sys
-from laya_relaxed_flow import OUT,ROOT
+from legacy_laya_v1.laya_relaxed_flow import OUT,ROOT
 from semantic_label_common import dump
 
 

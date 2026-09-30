@@ -12,7 +12,7 @@ import json
 
 import numpy as np
 
-from laya_acceptance_common import allowed, digest, dump, probabilities, read_jsonl
+from legacy_laya_v1.laya_acceptance_common import allowed, digest, dump, probabilities, read_jsonl
 
 
 ROOT = Path(__file__).resolve().parent

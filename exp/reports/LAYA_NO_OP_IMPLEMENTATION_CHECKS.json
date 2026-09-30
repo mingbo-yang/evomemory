@@ -1,0 +1,45 @@
+{
+  "created_at_utc": "2026-09-30T15:14:42.981635+00:00",
+  "scope": "local no-op rule implementation; no GitHub changes",
+  "model_population": "current != candidate; exact string comparison",
+  "label_epsilon": 0.0,
+  "epsilon_memory": 0.0,
+  "no_op_rule": "exact equal text -> deterministic Reject without Laya; excluded from primary training and evaluation; retained in raw collection and audit sidecars",
+  "changed_equal_comet_rule": "retain as Reject",
+  "offline_tests": {
+    "passed": 59,
+    "subtests_passed": 14,
+    "warning": "existing BERT constant-input correlation warning"
+  },
+  "static_check": "passed",
+  "regression_coverage": [
+    "textually changed COMET ties retained as Reject",
+    "no-op audit-only in train, development, diagnostic and frozen-test folds",
+    "no-op-only fold retained for audit without quality scoring",
+    "source isolation includes no-op-only sources",
+    "contaminated model input and metrics fail closed",
+    "runtime no-op bypasses tokenization, model inference and stale cache",
+    "mixed changed/no-op inference preserves decisions",
+    "full_static and full_online traces explicitly log no-op Reject",
+    "delayed memory feedback excludes no-op"
+  ],
+  "real_comet_scoring_run": false,
+  "real_model_training_run": false,
+  "real_rollout_run": false,
+  "rollback_source_snapshot": "/mnt/huawei/ymb/backups/laya-noop-rule-20260930T150633Z",
+  "source_sha256": {
+    "prepare_acceptance_training.py": "dd82a079316082eb3107e59e1447d960d1e7b62932f2320e6beff13b85611433",
+    "laya_acceptance_common.py": "4f5c8f156d4560dc7336d2839f6d625ae786d72d64af786e30c87d8f13260afd",
+    "laya_relaxed_flow.py": "864e8f8973dfffdd02909e8c099f78ad5c2fc3f732b301ef028d2255399da26c",
+    "laya_relaxed_policy.py": "ebfa091b64fd3f35b11695f51854ce6f678822357e2537a7babb4f4a1a641552",
+    "train_laya_acceptance.py": "4278245cd3d8ab8544ce891198ad3045a43f1a22e60a503e5f7569b1e7cacaf0",
+    "evaluate_laya_acceptance.py": "f6b3c41fe4bb729c5069403e4314e59c706916f049dad3daa4e9d53f34aaa6d5",
+    "configs/laya_binary_v1.json": "3e1f012ac8b7a99f2ca73e4078a145202f1956e2a7be1b1eadc67461d5b608d2",
+    "tests/test_prepare_acceptance_training.py": "5a1a1ac23a8fed99d11a42cd5fd76ee87ebfcedf04ab39428150ad1af0e97166",
+    "tests/test_laya_acceptance.py": "89d5f0c3d73575fecec52e0f0248addec3eaef38ccb0dd8eaef68127ca3bd3c7",
+    "tests/test_laya_relaxed_flow.py": "3ad129454914b4cdee9acdb871a472c65acd614f179c0e8be6739564a97919dd",
+    "reports/LAYA_BINARY_PROTOCOL.md": "cdee5dab5c1ed5218829265070a5859f31a49920414d6ffee89d48121a0b2a74",
+    "README.md": "06aa355e7fc2cfe5c1795c67b5d61a013d231b3b43b9485c2151fcd4045f40c0",
+    "PLAN.md": "d165e1384a3704f31e2579311cb302bd4c74f281128e8b72edfbaa5739db879c"
+  }
+}

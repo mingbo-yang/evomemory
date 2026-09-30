@@ -1,293 +1,374 @@
-"""Fresh-source Qwen3-8B rollout with frozen Laya and delayed memory feedback."""
-import os
-os.environ['CUDA_DEVICE_ORDER']='PCI_BUS_ID'
-os.environ['CUDA_VISIBLE_DEVICES']='0'
-os.environ['TOKENIZERS_PARALLELISM']='false'
-os.environ['VLLM_NO_USAGE_STATS']='1'
-from collections import Counter
-from dataclasses import asdict
-from datetime import datetime,timezone
+"""Current binary Laya pipeline: direct actions and independent delayed COMET memory admission.
+
+The historical filename remains an entry point; the old three-class experiment
+is explicitly preserved under legacy_laya_v1, with separate artifacts.
+"""
+import argparse
+from datetime import datetime, timezone
 import hashlib
 import json
+import os
 from pathlib import Path
 import shutil
-import time
-import numpy as np
-import torch
-import core
-from core import resolve_model_config
-from core.manifest import _iter_wmt_train_pairs,read_manifest,SampleRef,sha256_text
-from core.experience import load_experiences,save_experiences,render_experience_block
-from core.bm25_fields import Experience
-from core.scoring import Scorer
-from core.optimized_pipeline import INSTRUCTIONS
-from acceptance_data import norm,valid_candidate
-from semantic_label_common import dump,read_jsonl,OUT as MODEL_OUT
-from laya_relaxed_policy import choose_policy,select_candidate
-import laya_acceptance_common as C
 
-ROOT=Path(__file__).resolve().parent
-OUT=ROOT/'runs/laya_relaxed_flow_v1'
-TASK='wmt19_en_zh'
+from core import resolve_model_config
+from core.bm25_fields import Experience
+from core.experience import load_experiences, save_experiences, render_experience_block
+from core.manifest import read_manifest
+from core.optimized_pipeline import INSTRUCTIONS
+from core.comet_feedback import from_config, validate_epsilon, validated_scores
+from acceptance_data import valid_candidate
+import laya_acceptance_common as C
+from laya_relaxed_policy import choose_policy, select_candidate
+from prepare_acceptance_training import source_key
+
+ROOT = Path(__file__).resolve().parent
+OUT = ROOT / 'runs/laya_binary_flow_v1'
+TASK = 'wmt19_en_zh'
 
 
 def stable_seed(*parts):
-    return int(hashlib.sha256(('relaxed-flow-v1|'+'|'.join(map(str,parts))).encode()).hexdigest()[:8],16)%(2**31)
+    return C.seed_for('binary-flow-v1', *parts) % (2 ** 31)
 
 
-def status(stage,**kw):
-    dump(OUT/'status.json',{'stage':stage,'updated_at_utc':datetime.now(timezone.utc).isoformat(),**kw})
-
-
-def prepare():
-    path=OUT/'protocol.json'
-    if path.exists():
-        p=json.loads(path.read_text())
-        for name,h in p['input_hashes'].items():assert C.digest(OUT/name)==h
-        assert C.digest(Path(p['policy']['checkpoint'])/'model.safetensors')==p['model_sha256']
-        return p
-    OUT.mkdir(parents=True,exist_ok=True);policy=choose_policy();blocked=set()
-    paths=list((ROOT/'data/manifests').glob('*.jsonl'))+list((ROOT/'runs').rglob('*_manifest.jsonl'))
-    for manifest in paths:
-        if OUT in manifest.parents:continue
-        for line in manifest.read_text().splitlines():
-            if not line.strip():continue
-            row=json.loads(line)
-            for key in ['source','reference']:
-                if row.get(key):blocked.add(norm(row[key]))
-    memory=ROOT/'runs/acceptance_data_v2/initial_memory.jsonl'
-    library=load_experiences(memory)
-    for e in library:
-        blocked.update(norm(t) for t in [e.source_input,e.state_before,e.state_after] if t)
-    pool=[];seen=set();excluded=Counter()
-    for idx,source,ref in _iter_wmt_train_pairs('en_zh'):
-        if idx<40000:continue
-        if idx>=80000:break
-        keys={norm(source),norm(ref)}
-        if '' in keys or keys&blocked or keys&seen:excluded['overlap_or_empty']+=1;continue
-        if not 4<=len(source.split())<=180:excluded['source_length']+=1;continue
-        seen.update(keys);pool.append((idx,source,ref))
-    pool.sort(key=lambda r:hashlib.sha256(('relaxed-fresh-v1|'+r[1]).encode()).hexdigest())
-    assert len(pool)>=256
-    refs=[SampleRef(f'{TASK}/relaxed_flow_v1/{i:06d}',TASK,'fresh_pilot',idx,source,ref,sha256_text(source),
-           'WMT train rows 40000:80000; source/target normalized isolation from previous manifests and initial memory')
-          for i,(idx,source,ref) in enumerate(pool[:256])]
-    (OUT/'test_manifest.jsonl').write_text(''.join(json.dumps(asdict(r),ensure_ascii=False)+'\n' for r in refs))
-    shutil.copy2(memory,OUT/'initial_memory.jsonl')
-    shutil.copy2(ROOT/'runs/acceptance_data_v2/retrieval.json',OUT/'retrieval.json')
-    dump(OUT/'acceptance_policy.json',policy)
-    dump(MODEL_OUT/'semantic/relaxed_acceptance_policy.json',{k:v for k,v in policy.items() if k!='grid'})
-    protocol={'created_at_utc':datetime.now(timezone.utc).isoformat(),'task':TASK,'sources':256,
-       'generator':'qwen3-8b','generator_path':resolve_model_config('qwen3-8b').path,
-       'verifier':'frozen laya-multilingual semantic/best','model_sha256':C.digest(Path(policy['checkpoint'])/'model.safetensors'),
-       'policy':{k:v for k,v in policy.items() if k!='grid'},'gpu':0,'gpu_memory_utilization':.34,
-       'max_rounds':3,'candidates_per_round':4,'temperature':.1,'top_p':1.,'max_tokens':1024,'max_model_len':4096,
-       'batch_size':16,'retrieval_k':4,'alpha':.5,'renderer':'v2, neutral Refined Translation label for all memories',
-       'arms':['initial','unfiltered_static','laya_static','conditional_laya_online'],
-       'unfiltered_policy':'first basic-valid changed candidate; stop if none; no verifier',
-       'laya_policy':'highest pBetter among valid changed candidates passing the frozen threshold; reject then stop',
-       'drafts':'one shared freshly generated draft per source, reused exactly by all arms',
-       'generation_cache':'identical prompt+system+seed+settings reused across arms; logical token budgets reported, cached wall time not a latency comparison',
-       'online_continuation':'only if laya_static has >=1 accepted revision and corpus SacreBLEU exceeds the shared initial; exploratory continuation, CI need not exclude zero',
-       'online_admission':'all unique basic-valid changed candidates with delayed legacy proxy feedback delta >1.0 point; acceptance independent; no current-task reference text in prompts or memory',
-       'online_timing':'commit after all tasks in a 16-source batch finish; no feedback informs same-task decisions',
-       'metrics':'primary corpus SacreBLEU tokenize=zh; secondary chrF++; legacy per-candidate delta is diagnostic/feedback only',
-       'success_reporting':'report task-score deltas and source bootstrap CIs plus actual accepted-modification outcomes; no 80% prerequisite',
-       'uncertainty':'single seed, small pilot, reference metrics imperfect; no retuning using these fresh outcomes',
-       'initial_memory_size':len(library),'pool_size':len(pool),'exclusions':dict(excluded),
-       'input_hashes':{n:C.digest(OUT/n) for n in ['test_manifest.jsonl','initial_memory.jsonl','retrieval.json','acceptance_policy.json']}}
-    dump(path,protocol);return protocol
+def memory_key(source, before, after):
+    return hashlib.sha256(json.dumps([source, before, after], ensure_ascii=False).encode()).hexdigest()
 
 
 class Generator:
-    def __init__(self,p):
+    def __init__(self, protocol, output):
         from baseline_core.llm import LLMClient
         from baseline_core.tasks import get_adapter
-        self.client=LLMClient(resolve_model_config('qwen3-8b'),backend='vllm',gpu='0',
-                    gpu_memory_utilization=p['gpu_memory_utilization'],max_model_len=4096,enforce_eager=True)
-        self.adapter=get_adapter(TASK);self.p=p;self.calls=0;self.hits=0
-        (OUT/'generation_cache').mkdir(exist_ok=True)
+        self.p = protocol
+        self.output = Path(output)
+        self.client = LLMClient(resolve_model_config(protocol['generator']), backend='vllm', gpu=protocol['gpu'],
+                               gpu_memory_utilization=protocol['gpu_memory_utilization'], max_model_len=4096, enforce_eager=True)
+        self.adapter = get_adapter(TASK)
+        self.calls = 0
+        self.hits = 0
+        (self.output / 'generation_cache').mkdir(exist_ok=True)
 
-    def generate(self,requests):
+    def generate(self, requests):
         from vllm import SamplingParams
-        result=[None]*len(requests);pending={}
-        for i,r in enumerate(requests):
-            payload={'prompt':r['prompt'],'system':self.adapter.system_prompt(),'seed':r['seed'],
-                     'temperature':.1,'top_p':1.,'max_tokens':1024,'model':self.p['generator_path']}
-            key=hashlib.sha256(json.dumps(payload,ensure_ascii=False,sort_keys=True).encode()).hexdigest()
-            path=OUT/'generation_cache'/f'{key}.json'
-            if path.exists():result[i]=json.loads(path.read_text());self.hits+=1;continue
-            text=self.client._chat_text(payload['system'],payload['prompt']);n=self.client.count_tokens(text)
-            if n+1024>4096:
-                row={'text':'','finish_reason':'context_length_exceeded','input_tokens':n,'output_tokens':0,'seed':r['seed'],'cache_key':key}
-                dump(path,row);result[i]=row;continue
-            if key not in pending:pending[key]={'indices':[],'text':text,'request':r,'path':path}
+        result = [None] * len(requests)
+        pending = {}
+        for i, request in enumerate(requests):
+            payload = {'prompt': request['prompt'], 'system': self.adapter.system_prompt(), 'seed': request['seed'],
+                       'temperature': .1, 'top_p': 1., 'max_tokens': 1024, 'model': self.p['generator_path']}
+            key = hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
+            path = self.output / 'generation_cache' / f'{key}.json'
+            if path.exists():
+                result[i] = json.loads(path.read_text())
+                self.hits += 1
+                continue
+            text = self.client._chat_text(payload['system'], payload['prompt'])
+            n = self.client.count_tokens(text)
+            if n + 1024 > 4096:
+                result[i] = {'text': '', 'finish_reason': 'context_length_exceeded', 'input_tokens': n, 'output_tokens': 0}
+                continue
+            if key not in pending:
+                pending[key] = {'indices': [], 'text': text, 'request': request, 'path': path}
             pending[key]['indices'].append(i)
-        items=list(pending.items())
+        items = list(pending.items())
         if items:
-            params=[SamplingParams(temperature=.1,top_p=1.,max_tokens=1024,seed=item['request']['seed'],
-                     stop_token_ids=self.client.stop_token_ids or None) for _,item in items]
-            outputs=self.client.model.generate([item['text'] for _,item in items],params,use_tqdm=False)
-            assert len(outputs)==len(items);self.calls+=len(items)
-            for (key,item),out in zip(items,outputs):
-                g=out.outputs[0]
-                row={'text':self.adapter.parse_output(g.text),'raw_text':g.text,'finish_reason':g.finish_reason,
-                     'input_tokens':len(out.prompt_token_ids),'output_tokens':len(g.token_ids),'seed':item['request']['seed'],'cache_key':key}
-                dump(item['path'],row)
-                for i in item['indices']:result[i]=row
-        assert all(r is not None for r in result)
+            params = [SamplingParams(temperature=.1, top_p=1., max_tokens=1024, seed=item['request']['seed'],
+                                     stop_token_ids=self.client.stop_token_ids or None) for _, item in items]
+            outputs = self.client.model.generate([item['text'] for _, item in items], params, use_tqdm=False)
+            if len(outputs) != len(items):
+                raise ValueError('Generator output count mismatch')
+            self.calls += len(items)
+            for (key, item), output in zip(items, outputs):
+                g = output.outputs[0]
+                row = {'text': self.adapter.parse_output(g.text), 'raw_text': g.text, 'finish_reason': g.finish_reason,
+                       'input_tokens': len(output.prompt_token_ids), 'output_tokens': len(g.token_ids),
+                       'seed': item['request']['seed'], 'cache_key': key}
+                C.dump(item['path'], row)
+                for i in item['indices']:
+                    result[i] = row
         return result
 
 
 class Verifier:
-    def __init__(self,p):
-        self.tok=C.get_tokenizer();self.model,self.cfg=C.load_model(Path(p['policy']['checkpoint']));self.model.to('cuda')
-        self.temperature=self.cfg['temperature'][0];self.cache={};self.scored=0
-        empty=C.EncodedPairs([],self.tok);self.overhead=max(len(v[0]) for v in empty.prefixes.values())+1
+    def __init__(self, checkpoint, device='cuda', diagnostic_temperature=1.0):
+        self.cfg = C.validate_checkpoint(checkpoint)
+        self.tok = C.get_tokenizer(checkpoint)
+        self.model, _ = C.load_model(checkpoint)
+        self.model.to(device)
+        self.diagnostic_temperature = diagnostic_temperature
+        self.cache = {}
+        self.scored = 0
+        empty = C.EncodedPairs([], self.tok)
+        self.overhead = max(len(p[0]) for p in empty.prefixes.values()) + 1
 
-    def score(self,rows):
-        pending={};out={}
-        for r in rows:
-            key=hashlib.sha256(json.dumps(r['input'],ensure_ascii=False,sort_keys=True).encode()).hexdigest()
-            if key in self.cache:out[r['id']]=self.cache[key];continue
-            length=len(self.tok(C.state_text(r['input']).replace(self.tok.mask_token,' '),add_special_tokens=False)['input_ids'])+self.overhead
-            if length>1024:out[r['id']]=None;continue
-            pending.setdefault(key,{'row':dict(r,id=key),'ids':[]})['ids'].append(r['id'])
+    def predict(self, rows):
+        pending, out = {}, {}
+        for row in rows:
+            inputs = C.model_input(row['input'])
+            if C.is_noop(inputs):
+                out[row['id']] = {'decision': 'Reject', 'status': 'no_op',
+                                  'decision_origin': 'deterministic_rule', 'probabilities': None}
+                continue
+            key = hashlib.sha256(json.dumps(inputs, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
+            if key in self.cache:
+                out[row['id']] = self.cache[key]
+                continue
+            length = len(self.tok(C.state_text(inputs).replace(self.tok.mask_token, ' '), add_special_tokens=False)['input_ids']) + self.overhead
+            if length > 1024:
+                out[row['id']] = {'decision': 'Reject', 'status': 'context_overflow', 'probabilities': None}
+                continue
+            pending.setdefault(key, {'row': {'id': key, 'input': inputs}, 'ids': []})['ids'].append(row['id'])
         if pending:
-            items=list(pending.items());enc=C.EncodedPairs([v['row'] for _,v in items],self.tok)
-            p=C.probabilities(C.infer(self.model,enc,batch_size=16),self.temperature);self.scored+=len(items)
-            for (key,obj),probs in zip(items,p):
-                self.cache[key]=probs.tolist()
-                for ident in obj['ids']:out[ident]=self.cache[key]
+            items = list(pending.items())
+            encoded = C.EncodedPairs([v['row'] for _, v in items], self.tok)
+            logits = C.infer(self.model, encoded, batch_size=16)
+            classes = C.decisions(logits)
+            probabilities = C.probabilities(logits, self.diagnostic_temperature)
+            self.scored += len(items)
+            for (key, obj), z, decision, p in zip(items, logits, classes, probabilities):
+                self.cache[key] = {'decision': decision, 'status': 'classified', 'logits': z.tolist(),
+                                   'probabilities': dict(zip(C.LABELS, p.tolist()))}
+                for ident in obj['ids']:
+                    out[ident] = self.cache[key]
         return out
 
 
-def positive_memories(trace,reference,scorer,existing):
-    """Called only after task termination; rejected positive candidates also qualify."""
-    result=[]
+def feedback_pairs(trace, reference):
+    """Enumerate every valid modification, regardless of verifier decision."""
+    pairs, locations = [], []
     for rd in trace['rounds']:
-        before=rd['before'];old=scorer.primary(reference,before)
+        before = rd['before']
         for candidate in rd['candidates']:
-            if not candidate['valid'] or not candidate['changed']:continue
-            after=candidate['text'];delta=scorer.primary(reference,after)-old
-            if delta<=1.:continue
-            key=hashlib.sha256(json.dumps([trace['source'],before,after],ensure_ascii=False).encode()).hexdigest()
-            if key in existing:continue
-            existing.add(key)
-            result.append(Experience(exp_id='online-'+key,task=TASK,model='qwen3-8b',source_input=trace['source'],
-                state_before=before,state_after=after,intervention_instruction=INSTRUCTIONS[TASK],
-                intervention_rationale='Generated candidate with positive delayed benchmark feedback.',
-                verdict='better',reason_a='',reason_b='',order_consistent=False,delta_offline=delta,
-                provenance='relaxed_flow_v1_delayed_feedback',outcome_label='helped'))
+            if not candidate.get('valid') or not candidate.get('changed') or candidate['text'] == before:
+                continue
+            pairs.append({'source': trace['source'], 'current': before, 'candidate': candidate['text'], 'reference': reference})
+            locations.append((rd, candidate))
+    return pairs, locations
+
+
+def positive_memories(trace, reference, feedback, existing, epsilon_memory, audit=None, precomputed=None):
+    """Task is already complete. Rejected positives qualify independently."""
+    epsilon_memory = validate_epsilon(epsilon_memory, 'epsilon_memory')
+    if feedback.metric != 'comet':
+        raise ValueError('Memory feedback must use COMET in this protocol')
+    pairs, locations = feedback_pairs(trace, reference)
+    raw_scores = feedback.score_pairs(pairs) if precomputed is None and pairs else (precomputed or [])
+    scores = validated_scores(pairs, raw_scores)
+    result = []
+    for pair, (rd, candidate), score in zip(pairs, locations, scores):
+        delta = score['delta']
+        key = memory_key(trace['source'], pair['current'], pair['candidate'])
+        eligible = delta > epsilon_memory
+        added = eligible and key not in existing
+        if audit is not None:
+            audit.append({'candidate_id': candidate.get('id'), 'round': rd.get('round'), **score,
+                          'decision': candidate.get('decision'), 'positive_feedback': eligible,
+                          'memory_candidate': added, 'epsilon_memory': epsilon_memory})
+        if not added:
+            continue
+        existing.add(key)
+        result.append(Experience(exp_id='online-' + key, task=TASK, model='qwen3-8b', source_input=trace['source'],
+                                 state_before=pair['current'], state_after=pair['candidate'],
+                                 intervention_instruction=INSTRUCTIONS[TASK],
+                                 intervention_rationale='Positive delayed COMET feedback after task completion.',
+                                 verdict='better', reason_a='', reason_b='', order_consistent=False,
+                                 delta_offline=delta, provenance=C.SCHEMA + '_delayed_comet', outcome_label='helped'))
     return result
 
 
 class Flow:
-    def __init__(self,p,generator,verifier):
-        from core.hybrid_retrieval import LocalSentenceEncoder,HybridExperienceRetriever
-        self.p=p;self.gen=generator;self.verifier=verifier;self.scorer=Scorer(TASK)
-        cfg=json.loads((OUT/'retrieval.json').read_text());opts=dict(cfg['retrieval']);opts.pop('method')
-        self.encoder=LocalSentenceEncoder(cfg['encoder'],'cpu');self.options=opts;self.retriever_class=HybridExperienceRetriever
+    def __init__(self, protocol, generator, verifier, feedback, output, *, encoder=None, retriever_class=None):
+        from core.hybrid_retrieval import LocalSentenceEncoder, HybridExperienceRetriever
+        self.p, self.gen, self.verifier, self.feedback = protocol, generator, verifier, feedback
+        self.output = Path(output)
+        cfg = json.loads((self.output / 'retrieval.json').read_text())
+        self.options = dict(cfg['retrieval'])
+        self.options.pop('method', None)
+        self.encoder = encoder if encoder is not None else LocalSentenceEncoder(cfg['encoder'], 'cpu')
+        self.retriever_class = retriever_class or HybridExperienceRetriever
 
-    def drafts(self,refs):
+    def drafts(self, refs):
         from baseline_core.types import TaskExample
-        outputs=[]
-        for start in range(0,len(refs),16):
-            batch=refs[start:start+16]
-            requests=[{'prompt':self.gen.adapter.initial_prompt(TaskExample(index=i,source=r.source,reference='',task=TASK)),
-                       'seed':stable_seed(r.sample_id,'draft')} for i,r in enumerate(batch,start)]
-            outputs.extend(self.gen.generate(requests));status('drafts',completed=len(outputs),total=len(refs))
-        dump(OUT/'shared_drafts.json',outputs);return outputs
+        requests = [{'prompt': self.gen.adapter.initial_prompt(TaskExample(index=i, source=r.source, reference='', task=TASK)),
+                     'seed': stable_seed(r.sample_id, 'draft')} for i, r in enumerate(refs)]
+        outputs = []
+        for start in range(0, len(requests), self.p['batch_size']):
+            outputs.extend(self.gen.generate(requests[start:start + self.p['batch_size']]))
+        C.dump(self.output / 'shared_drafts.json', outputs)
+        return outputs
 
-    def run(self,name,refs,drafts,online=False):
+    def run(self, name, refs, drafts, online=False):
         from baseline_core.types import TaskExample
         from core.pipeline import build_refine_prompt
-        lib=load_experiences(OUT/'initial_memory.jsonl');retriever=self.retriever_class(lib,self.encoder,**self.options)
-        existing={hashlib.sha256(json.dumps([e.source_input,e.state_before,e.state_after],ensure_ascii=False).encode()).hexdigest() for e in lib}
-        records=[];directory=OUT/name;directory.mkdir(exist_ok=True)
-        for start in range(0,len(refs),16):
-            batch=refs[start:start+16];path=directory/f'batch_{start:06d}.json'
-            if path.exists():
-                traces=json.loads(path.read_text())
-            else:
-                traces=[{'sample_id':r.sample_id,'source':r.source,'initial':d['text'],'final':d['text'],
-                         'draft_valid':valid_candidate('',d)[0],'rounds':[],'bank_size_at_start':len(lib)}
-                        for r,d in zip(batch,drafts[start:start+16])]
-                active=[i for i,t in enumerate(traces) if t['draft_valid']]
-                by_id={e.exp_id:e for e in lib}
-                for round_index in range(1,4):
-                    if not active:break
-                    requests=[];rounds={}
-                    for i in active:
-                        tr=traces[i];before=tr['final'];ret=retriever.retrieve(tr['source'],before,alpha=.5,k=4,exclude_source=tr['source'])
-                        block=render_experience_block([by_id[k] for k in ret.exp_ids],count_tokens=self.gen.client.count_tokens,
-                             max_units=4,contrastive=True,advice_mode='summary').replace('Refined Translation (Gold):','Refined Translation:')
-                        prompt=build_refine_prompt(self.gen.adapter,TaskExample(index=start+i,source=tr['source'],reference='',task=TASK),
-                             before,INSTRUCTIONS[TASK],experience_block=block,renderer='v2')
-                        rounds[i]={'round':round_index,'before':before,'retrieved_ids':ret.exp_ids,
-                             'online_retrieved':sum(k.startswith('online-') for k in ret.exp_ids),'candidates':[],
-                             'selected_slot':None,'accepted':False,'bank_size':len(lib)}
-                        requests.extend({'prompt':prompt,'seed':stable_seed(tr['sample_id'],round_index,slot)} for slot in range(4))
-                    generated=self.gen.generate(requests);score_rows=[]
-                    for pos,i in enumerate(active):
-                        rd=rounds[i]
-                        for slot,g in enumerate(generated[4*pos:4*pos+4]):
-                            valid,why=valid_candidate(rd['before'],g);changed=g['text']!=rd['before']
-                            ident=f'{traces[i]["sample_id"]}:{round_index}:{slot}'
-                            row={**g,'slot':slot,'valid':valid,'validity_reason':why,'changed':changed,'probabilities':None,'id':ident}
-                            rd['candidates'].append(row)
-                            if name!='unfiltered_static' and valid and changed:
-                                score_rows.append({'id':ident,'input':{'source':traces[i]['source'],'current':rd['before'],'candidate':g['text']}})
-                    scored=self.verifier.score(score_rows) if score_rows else {};next_active=[]
-                    for i in active:
-                        rd=rounds[i]
-                        for c in rd['candidates']:
-                            c['probabilities']=scored.get(c['id'])
-                            if name!='unfiltered_static' and c['valid'] and c['changed'] and c['probabilities'] is None:
-                                c['verifier_status']='context_overflow'
-                        slot=select_candidate(rd['candidates'],self.p['policy'],'unfiltered' if name=='unfiltered_static' else 'laya')
-                        if slot is not None:
-                            rd['selected_slot']=slot;rd['accepted']=True;traces[i]['final']=rd['candidates'][slot]['text'];next_active.append(i)
-                        traces[i]['rounds'].append(rd)
-                    active=next_active
-                dump(path,traces)
-            records.extend(traces)
+        if len(refs) != len(drafts):
+            raise ValueError('Draft/reference count mismatch')
+        lib = load_experiences(self.output / 'initial_memory.jsonl')
+        retriever = self.retriever_class(lib, self.encoder, **self.options)
+        existing = {memory_key(e.source_input, e.state_before, e.state_after) for e in lib}
+        directory = self.output / name
+        directory.mkdir(exist_ok=False)
+        records = []
+        for start in range(0, len(refs), self.p['batch_size']):
+            batch = refs[start:start + self.p['batch_size']]
+            traces = [{'sample_id': r.sample_id, 'source': r.source, 'initial': d['text'], 'final': d['text'],
+                       'draft_valid': valid_candidate('', d)[0], 'rounds': [], 'bank_size_at_start': len(lib)}
+                      for r, d in zip(batch, drafts[start:start + len(batch)])]
+            active = [i for i, tr in enumerate(traces) if tr['draft_valid']]
+            by_id = {e.exp_id: e for e in lib}
+            for round_index in range(1, self.p['max_rounds'] + 1):
+                if not active:
+                    break
+                requests, rounds = [], {}
+                for i in active:
+                    tr = traces[i]
+                    before = tr['final']
+                    ret = retriever.retrieve(tr['source'], before, alpha=.5, k=4, exclude_source=tr['source'])
+                    block = render_experience_block([by_id[k] for k in ret.exp_ids], count_tokens=self.gen.client.count_tokens,
+                                                    max_units=4, contrastive=True, advice_mode='summary').replace('Refined Translation (Gold):', 'Refined Translation:')
+                    prompt = build_refine_prompt(self.gen.adapter, TaskExample(index=start + i, source=tr['source'], reference='', task=TASK),
+                                                 before, INSTRUCTIONS[TASK], experience_block=block, renderer='v2')
+                    rounds[i] = {'round': round_index, 'before': before, 'retrieved_ids': ret.exp_ids,
+                                 'online_retrieved': sum(k.startswith('online-') for k in ret.exp_ids),
+                                 'candidates': [], 'selected_slot': None, 'accepted': False, 'bank_size': len(lib)}
+                    requests.extend({'prompt': prompt, 'seed': stable_seed(tr['sample_id'], round_index, slot)}
+                                    for slot in range(self.p['candidates_per_round']))
+                generated = self.gen.generate(requests)
+                if len(generated) != len(requests):
+                    raise ValueError('Candidate count mismatch')
+                score_rows = []
+                k = self.p['candidates_per_round']
+                for pos, i in enumerate(active):
+                    rd = rounds[i]
+                    for slot, g in enumerate(generated[k * pos:k * (pos + 1)]):
+                        valid, why = valid_candidate(rd['before'], g)
+                        candidate = dict(g, slot=slot, valid=valid, validity_reason=why, changed=g['text'] != rd['before'],
+                                         id=f"{traces[i]['sample_id']}:{round_index}:{slot}", decision=None)
+                        if not candidate['changed']:
+                            candidate.update(decision='Reject', status='no_op',
+                                             decision_origin='deterministic_rule', probabilities=None)
+                        rd['candidates'].append(candidate)
+                        if name != 'unfiltered_static' and valid and candidate['changed']:
+                            score_rows.append({'id': candidate['id'], 'input': {'source': traces[i]['source'], 'current': rd['before'], 'candidate': g['text']}})
+                scored = self.verifier.predict(score_rows) if score_rows else {}
+                next_active = []
+                for i in active:
+                    rd = rounds[i]
+                    for candidate in rd['candidates']:
+                        if candidate['id'] in scored:
+                            candidate.update(scored[candidate['id']])
+                        elif name != 'unfiltered_static' and candidate['valid'] and candidate['changed']:
+                            raise ValueError('Missing verifier decision; do not silently accept')
+                    selected = select_candidate(rd['candidates'], self.p['policy'], 'unfiltered' if name == 'unfiltered_static' else 'laya')
+                    if selected is not None:
+                        rd.update(selected_slot=selected, accepted=True)
+                        traces[i]['final'] = rd['candidates'][selected]['text']
+                        next_active.append(i)
+                    traces[i]['rounds'].append(rd)
+                active = next_active
+            # No feedback is computed until every task in this batch has finished.
+            additions, feedback_audit = [], []
+            task_pairs = [feedback_pairs(tr, ref.reference)[0] for tr, ref in zip(traces, batch)]
+            all_pairs = [pair for pairs in task_pairs for pair in pairs]
+            # One COMET worker invocation per completed batch, not per candidate/task.
+            all_scores = validated_scores(all_pairs, self.feedback.score_pairs(all_pairs)) if all_pairs else []
+            offset = 0
+            for tr, ref, pairs in zip(traces, batch, task_pairs):
+                additions.extend(positive_memories(tr, ref.reference, self.feedback, existing,
+                                                   self.p['epsilon_memory'], audit=feedback_audit,
+                                                   precomputed=all_scores[offset:offset + len(pairs)]))
+                offset += len(pairs)
             if online:
-                additions=[]
-                for trace,ref in zip(traces,batch):
-                    assert trace['sample_id']==ref.sample_id
-                    additions.extend(positive_memories(trace,ref.reference,self.scorer,existing))
                 lib.extend(additions)
-                if additions:retriever=retriever.rebuild(lib)
-                dump(directory/f'admission_{start:06d}.json',{'after_completed_sources':start+len(batch),'added':len(additions),
-                    'new_ids':[e.exp_id for e in additions],'bank_size':len(lib),'positive_feedback_independent_of_acceptance':True})
-            status('rollout',arm=name,completed=len(records),total=len(refs),bank_size=len(lib))
-            print('ROLLOUT',name,len(records),'/',len(refs),'bank',len(lib),flush=True)
-        if online:save_experiences(lib,directory/'final_memory.jsonl')
-        dump(directory/'results.json',records);return records
+                if additions:
+                    retriever = retriever.rebuild(lib)
+            C.dump(directory / f'feedback_{start:06d}.json', {'after_completed_sources': start + len(batch),
+                   'candidates': feedback_audit, 'admitted': [e.exp_id for e in additions] if online else [],
+                   'memory_frozen': not online, 'bank_size': len(lib)})
+            C.dump(directory / f'batch_{start:06d}.json', traces)
+            records.extend(traces)
+        save_experiences(lib, directory / 'final_memory.jsonl')
+        C.dump(directory / 'results.json', records)
+        return records
 
 
-def main():
-    torch.set_num_threads(4);p=prepare();status('loading_generator')
-    refs=read_manifest(OUT/'test_manifest.jsonl');gen=Generator(p);verifier=Verifier(p);flow=Flow(p,gen,verifier)
-    drafts=flow.drafts(refs)
-    static=flow.run('laya_static',refs,drafts)
-    # Static task is fully finished before any fresh outcome is computed.
-    initial=flow.scorer.score_corpus((r.reference,d['text']) for r,d in zip(refs,drafts))['bleu']
-    final=flow.scorer.score_corpus((r.reference,t['final']) for r,t in zip(refs,static))['bleu']
-    accepted=sum(rd['accepted'] for tr in static for rd in tr['rounds'])
-    continuation=accepted>0 and final>initial
-    dump(OUT/'static_continuation.json',{'initial_bleu':initial,'laya_static_bleu':final,'delta':final-initial,
-                                      'accepted':accepted,'run_online':continuation,'rule':p['online_continuation']})
-    flow.run('unfiltered_static',refs,drafts)
-    if continuation:flow.run('laya_online',refs,drafts,online=True)
-    dump(OUT/'execution_audit.json',{'actual_uncached_generation_calls':gen.calls,'cache_hits':gen.hits,
-                                   'unique_verifier_pairs':verifier.scored,'primary_test_not_used_for_policy_tuning':True})
-    status('generation_complete',online_ran=continuation)
-    print('GENERATION_COMPLETE',flush=True)
+def prepare(args, feedback):
+    cfg = json.loads(args.config.read_text())
+    if cfg.get('decision_schema') != C.SCHEMA:
+        raise ValueError('Expected current binary protocol config')
+    epsilon_memory = validate_epsilon(cfg['epsilon_memory'], 'epsilon_memory')
+    policy = choose_policy(args.checkpoint)
+    checkpoint_cfg = C.validate_checkpoint(args.checkpoint)
+    trained_feedback = checkpoint_cfg.get('label_feedback', {})
+    current_feedback = feedback.metadata
+    if (trained_feedback.get('metric') != 'comet'
+            or trained_feedback.get('checkpoint_sha256') != current_feedback.get('checkpoint_sha256')
+            or trained_feedback.get('epsilon') != validate_epsilon(cfg['label_epsilon'])):
+        raise ValueError('Checkpoint must match the configured COMET feedback and offline label definition')
+    if cfg.get('labels') != C.LABELS or cfg.get('input_schema') != list(C.INPUT_FIELDS):
+        raise ValueError('Binary protocol input/output schema mismatch')
+    refs = read_manifest(args.manifest)
+    seen = set(checkpoint_cfg.get('seen_source_hashes', []))
+    memory = load_experiences(args.initial_memory)
+    memory_sources = {source_key(e.source_input) for e in memory}
+    keys = [source_key(r.source) for r in refs]
+    if (not seen or not refs or any(not r.source.strip() or not r.reference.strip() for r in refs)
+            or len(keys) != len(set(keys)) or set(keys) & (seen | memory_sources)):
+        raise ValueError('Require unique held-out sources isolated from model-development data and initial memory')
+    if args.output.exists():
+        raise FileExistsError('Use a fresh binary rollout directory; old results must not be overwritten')
+    args.output.mkdir(parents=True)
+    shutil.copy2(args.manifest, args.output / 'test_manifest.jsonl')
+    shutil.copy2(args.initial_memory, args.output / 'initial_memory.jsonl')
+    shutil.copy2(args.retrieval_config, args.output / 'retrieval.json')
+    protocol = {'version': C.SCHEMA, 'created_at_utc': datetime.now(timezone.utc).isoformat(),
+                'policy': policy, 'epsilon_memory': epsilon_memory, 'feedback': feedback.metadata,
+                'generator': 'qwen3-8b', 'generator_path': resolve_model_config('qwen3-8b').path,
+                'gpu': args.gpu, 'gpu_memory_utilization': .34, 'batch_size': 16,
+                'max_rounds': 3, 'candidates_per_round': 4, 'model_sha256': C.digest(args.checkpoint / 'model.safetensors'),
+                'memory_admission': 'all valid changed candidates with delayed delta_COMET > epsilon_memory; independent of Accept/Reject',
+                'feedback_timing': 'after every task in the batch completes', 'arms': args.arms,
+                'input_hashes': {n: C.digest(args.output / n) for n in ['test_manifest.jsonl', 'initial_memory.jsonl', 'retrieval.json']}}
+    C.dump(args.output / 'protocol.json', protocol)
+    return protocol, refs
 
 
-if __name__=='__main__':
-    try:main()
-    except Exception as exc:
-        status('failed',error=repr(exc));raise
+def main(argv=None):
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--manifest', type=Path, required=True)
+    p.add_argument('--initial-memory', type=Path, default=C.COLLECTION / 'initial_memory.jsonl')
+    p.add_argument('--retrieval-config', type=Path, default=C.COLLECTION / 'retrieval.json')
+    p.add_argument('--checkpoint', type=Path, default=C.OUT / 'best')
+    p.add_argument('--config', type=Path, default=ROOT / 'configs/laya_binary_v1.json')
+    p.add_argument('--output', type=Path, default=OUT)
+    p.add_argument('--gpu', default='0')
+    p.add_argument('--arms', nargs='+', choices=['full_static', 'full_online', 'unfiltered_static'], default=['full_static', 'full_online'])
+    args = p.parse_args(argv)
+    if len(set(args.arms)) != len(args.arms):
+        raise ValueError('Duplicate experiment arms')
+    os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
+    os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
+    cfg = json.loads(args.config.read_text())
+    feedback = from_config(cfg['feedback'])
+    protocol, refs = prepare(args, feedback)
+    generator = Generator(protocol, args.output)
+    verifier = Verifier(args.checkpoint)
+    flow = Flow(protocol, generator, verifier, feedback, args.output)
+    drafts = flow.drafts(refs)
+    report = {'version': C.SCHEMA, 'decision_rule': protocol['policy'], 'arms': {}}
+    for name in args.arms:
+        results = flow.run(name, refs, drafts, online=name == 'full_online')
+        pairs = [{'source': r.source, 'current': d['text'], 'candidate': row['final'], 'reference': r.reference}
+                 for r, d, row in zip(refs, drafts, results)]
+        scores = validated_scores(pairs, feedback.score_pairs(pairs))
+        report['arms'][name] = {'sources': len(results), 'mean_delta_comet': sum(s['delta'] for s in scores) / len(scores),
+                               'accepted_edits': sum(rd['accepted'] for tr in results for rd in tr['rounds']),
+                               'final_task_feedback': scores}
+    report['execution_audit'] = {'uncached_generation_calls': generator.calls,
+                                 'generation_cache_hits': generator.hits,
+                                 'unique_verifier_pairs': verifier.scored,
+                                 'test_feedback_used_for_runtime_acceptance': False}
+    C.dump(args.output / 'report.json', report)
+    print(json.dumps(report['arms'], ensure_ascii=False, indent=2))
+
+
+if __name__ == '__main__':
+    main()
