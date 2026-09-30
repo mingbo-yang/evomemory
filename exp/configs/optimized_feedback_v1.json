@@ -1,0 +1,37 @@
+{
+  "version": "bert-hybrid-feedback-v1",
+  "bert_base": "/mnt/huawei/wwq/wwq/huggingface/model/bert-base-multilingual-cased",
+  "encoder": "/mnt/huawei/ymb/model/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf",
+  "device": "cpu",
+  "policy": {
+    "min_gain": 0.01,
+    "soft_length_ratio": 1.02,
+    "hard_length_ratio": 1.5,
+    "expansion_gain": 0.05,
+    "length_allowance": 8
+  },
+  "retrieval": {
+    "method": "hybrid",
+    "semantic_weight": 0.5,
+    "min_semantic_similarity": 0.2,
+    "rrf_k": 60
+  },
+  "tasks": {
+    "wmt19_en_zh": {
+      "checkpoint": "/mnt/huawei/wwq/model/aaa_experiment/control_n/model/layers_3_best.pth",
+      "stop_threshold": 0.6
+    },
+    "wmt19_zh_en": {
+      "checkpoint": "/mnt/huawei/wwq/model/aaa_experiment/control_n/model/layers_3_best.pth",
+      "stop_threshold": 0.6
+    },
+    "coedit_gec": {
+      "checkpoint": "/mnt/huawei/ymb/icml/bert/gec/model/model/layers_3_best.pth",
+      "stop_threshold": 0.9
+    },
+    "gigaword": {
+      "checkpoint": "/mnt/huawei/ymb/icml/bert/gigaword_tiny/model/model/layers_3_best.pth",
+      "stop_threshold": 0.3
+    }
+  }
+}

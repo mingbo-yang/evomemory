@@ -1,0 +1,2148 @@
+{
+  "format": "source-snapshot",
+  "source": "aaai2027",
+  "vendor_revision": "4066d5d5fbf08b66c6757ddeedbd797bd7655bc0",
+  "excluded": [
+    "experiment datasets",
+    "model weights",
+    "experience banks",
+    "runs",
+    "logs",
+    "generated scores/plots",
+    "backups",
+    "credentials",
+    "vendor benchmark data/results and notebooks"
+  ],
+  "files": [
+    {
+      "path": "baseline/README.md",
+      "sha256": "f851b432a753a408283ef275c7df5ecad43e183ce2df5eb4753391cb5fccc735",
+      "bytes": 1814
+    },
+    {
+      "path": "baseline/core/__init__.py",
+      "sha256": "c22c0ed81839fe9e40a5334ca2535522f5e556c71802772de91047bb20e4cedd",
+      "bytes": 52
+    },
+    {
+      "path": "baseline/core/config.py",
+      "sha256": "4e0febfac1fe4877254add7a145ac540cd07f828f945272ab69f092586da9e78",
+      "bytes": 2085
+    },
+    {
+      "path": "baseline/core/data.py",
+      "sha256": "8288cff0845eb08262614354b0f08b05ed2de4eb7e0576f87f5fc5488ee7479f",
+      "bytes": 3088
+    },
+    {
+      "path": "baseline/core/llm.py",
+      "sha256": "0f4901051bf249a67b17976d1003405b4c9f301ce517bff56a06844538fa96c5",
+      "bytes": 7316
+    },
+    {
+      "path": "baseline/core/metrics.py",
+      "sha256": "c934a31f3a33f21d5f97dc59930601d9f5fef7cc7e2fe7b45803d788b16e73e6",
+      "bytes": 3555
+    },
+    {
+      "path": "baseline/core/tasks.py",
+      "sha256": "6121c67fd0f3f1a936b65abe9598b804747fded1186761ea4e6df45b2c8f8861",
+      "bytes": 8108
+    },
+    {
+      "path": "baseline/core/types.py",
+      "sha256": "2f11e29ee742af35ae482f6473cbb1531eb8d43a18b0bbbcab66a72feb4a2b43",
+      "bytes": 3297
+    },
+    {
+      "path": "baseline/core/utility.py",
+      "sha256": "8478766c665c9429687dec858c0092ee7597cdb721a44bbf8d6a39a66f0f59b4",
+      "bytes": 4233
+    },
+    {
+      "path": "baseline/methods/__init__.py",
+      "sha256": "20dc6ce7a04bc479ea16c2f783bae91c14cc1c7d79a8b8c212d7f8329683410d",
+      "bytes": 40
+    },
+    {
+      "path": "baseline/methods/tts.py",
+      "sha256": "7d444860fb9c73f6825b6b6be246d329c4161328f4852562281bd8a1342915a8",
+      "bytes": 19293
+    },
+    {
+      "path": "baseline/run_baseline.py",
+      "sha256": "dcef7cbb8a191967effa3a277f0546e19c44890a53b99d44e07380ddf2aca966",
+      "bytes": 12512
+    },
+    {
+      "path": "baseline/run_full_baseline_scheduler.py",
+      "sha256": "ee606954cd0557da282468cba95f144555ab29e88015af2a740ce07639552f45",
+      "bytes": 12696
+    },
+    {
+      "path": "baseline/watch_full_baseline.py",
+      "sha256": "3320ab09663b0a993234facc090dcc31d7e3654e049bf908129735d2b5622334",
+      "bytes": 11222
+    },
+    {
+      "path": "exp/PLAN.md",
+      "sha256": "6a6ffd0fe3e81aa40f33c9eb13ec202457f86ed00576d742e9f045684c78a4e1",
+      "bytes": 64178
+    },
+    {
+      "path": "exp/acceptance_data.py",
+      "sha256": "9df6b1fc821e6dc8e733e9c3998c2e8aede040fd81d6d209612cb838daa3c59e",
+      "bytes": 19357
+    },
+    {
+      "path": "exp/acceptance_data_job.py",
+      "sha256": "2c40deb0f9e1f2b3b1df09fc2d038c5e4e5e82bfcd56e989e625fc3d5212e65b",
+      "bytes": 2219
+    },
+    {
+      "path": "exp/aggregate.py",
+      "sha256": "543a4284eefbc2971ccdcd2caf1dfab6e09794f7ecd469912d2f41ee7712a5b6",
+      "bytes": 14240
+    },
+    {
+      "path": "exp/analyze_laya_acceptance.py",
+      "sha256": "0f5b1dd5da63ad9a6dc28f06a6885136e012580151860a1446a93e0527b50a9e",
+      "bytes": 9275
+    },
+    {
+      "path": "exp/audit_laya_relaxed_accepts.py",
+      "sha256": "14b8ae02f0586f53fd71b7231efdf809423972519450d5b7928d76589fc2d2c9",
+      "bytes": 3271
+    },
+    {
+      "path": "exp/audit_optimized_flow.py",
+      "sha256": "6d96f7127513affcba5987d23f5e12c4c5396d560cefd04befe0f02592011f7e",
+      "bytes": 7734
+    },
+    {
+      "path": "exp/audit_semantic_output_format.py",
+      "sha256": "23029c56e20a55c234b4593ee133970853a60e229ac2b2e914ddc5bdcf9837e5",
+      "bytes": 824
+    },
+    {
+      "path": "exp/bert_feedback_study.py",
+      "sha256": "0ee2a39a688e9514b8bf635d3d25c1556b9287b1eb6c0aea8b43ce063c656f71",
+      "bytes": 12301
+    },
+    {
+      "path": "exp/build_contrastive_library.py",
+      "sha256": "956498033ebf62fa62a2e122041805c1eff35a8fe1fc744ef19aa0907cf41720",
+      "bytes": 6445
+    },
+    {
+      "path": "exp/build_experience.py",
+      "sha256": "eefd062362e3624517b7d316503d846b6053ef64d1eecb5611b1b8ead926e6f4",
+      "bytes": 10651
+    },
+    {
+      "path": "exp/build_manifests.py",
+      "sha256": "d573e6d211b994370d2f87515e7aed89a6a788d1109cc6821a27e997b9b7bdf9",
+      "bytes": 1497
+    },
+    {
+      "path": "exp/calibrate_judge.py",
+      "sha256": "5f551eccb33be893f8111b69e0b327bc4c4b51248bc307c3c1ea3be67357f828",
+      "bytes": 5506
+    },
+    {
+      "path": "exp/calibrate_laya_safe_acceptance.py",
+      "sha256": "d9ae5fb983d5a06cdf3722c1e5b513f619b3fa717d24826efb1866325578d7d3",
+      "bytes": 5376
+    },
+    {
+      "path": "exp/check_optimized.py",
+      "sha256": "6af037b6b04e4d19777e4e0a549c66b867f2f66c7bc16147955a6ca16a97b63e",
+      "bytes": 3861
+    },
+    {
+      "path": "exp/check_stop_rates.py",
+      "sha256": "a9a916bb3c1a4c7684e41e65284453f2652f913ece52bfcf852e828bfdff25c1",
+      "bytes": 2478
+    },
+    {
+      "path": "exp/configs/frozen.json",
+      "sha256": "8c35933dcab7f41129d3bcbec97d8ea8c5aa461c63b0d0b0bc482cadc3dbd8f9",
+      "bytes": 16381
+    },
+    {
+      "path": "exp/configs/optimized_feedback_v1.json",
+      "sha256": "4b8dd06fb969852b74f7a67c8392acae3b2ed891890ed326908fba65639accf1",
+      "bytes": 1167
+    },
+    {
+      "path": "exp/configs/queue.json",
+      "sha256": "13eb85e3bd50f1d1e6962fd072d02e92b3553f305c01f5d8e80ef64f1d9fe0b9",
+      "bytes": 25944
+    },
+    {
+      "path": "exp/consolidate_results.py",
+      "sha256": "32eae0fdb08b6ab11d6b2068b762207375cbb7ce6f5059a16899b0b234900fec",
+      "bytes": 11784
+    },
+    {
+      "path": "exp/core/__init__.py",
+      "sha256": "fc531461825db4187c958577f0e3a7defbede783b53ee66ef5457487db30bc32",
+      "bytes": 6217
+    },
+    {
+      "path": "exp/core/batch_llm.py",
+      "sha256": "c9a023c0f3d1ecfa9281ec06de5a33d607eeca24bb7bf685e05936484d8e04c2",
+      "bytes": 4771
+    },
+    {
+      "path": "exp/core/batched_pipeline.py",
+      "sha256": "0b209ced47bc0f294727f8947b02feec2a9a46804557760c69ed4b52c573957e",
+      "bytes": 30009
+    },
+    {
+      "path": "exp/core/bm25_fields.py",
+      "sha256": "c5ed1511adb9a9444cf50a179d31ff0dabf6b07727a3e2513b508672acd21321",
+      "bytes": 13869
+    },
+    {
+      "path": "exp/core/controller.py",
+      "sha256": "81718d5dc38e6d227e8c26a2c3d3caba1f821beeb2110f04537dfdc97c00c995",
+      "bytes": 11294
+    },
+    {
+      "path": "exp/core/determinism.py",
+      "sha256": "5624861be097a91acdc52ebedb1d48f6cdf7792e87df33a18f3c31875168ca5a",
+      "bytes": 1719
+    },
+    {
+      "path": "exp/core/experience.py",
+      "sha256": "4d27548a6f57b3b3d74731de40b7d0aa2cbbc88443140174d4cb015dc94de4c4",
+      "bytes": 9854
+    },
+    {
+      "path": "exp/core/hybrid_retrieval.py",
+      "sha256": "d2e2ece4511b62661916b20b313bc38f679098c2e8eda2eb31976468b52bce7e",
+      "bytes": 3362
+    },
+    {
+      "path": "exp/core/judge.py",
+      "sha256": "6e3fe4256857a5946207711ca86090295b3cb07128242429da9cd58f6119df47",
+      "bytes": 9738
+    },
+    {
+      "path": "exp/core/manifest.py",
+      "sha256": "ec1d8b9c6f78d3bcfc0c9477c0416f704b0b85e39d881071a9581b9dc35ed794",
+      "bytes": 10724
+    },
+    {
+      "path": "exp/core/optimization_config.py",
+      "sha256": "1a59c70f4282a386c2197b469130a5a0f0f486b0ea6961186264fb7caababc77",
+      "bytes": 3459
+    },
+    {
+      "path": "exp/core/optimized_pipeline.py",
+      "sha256": "80f6988ec79e77ede020733d19f9afa4d9e80033d4f1c5b5c8c76b92f2d1a497",
+      "bytes": 7274
+    },
+    {
+      "path": "exp/core/pipeline.py",
+      "sha256": "6c4565011cdba74b9088b07dcb98834c5972b4e3ed2615e1919cf1250ce0757a",
+      "bytes": 33957
+    },
+    {
+      "path": "exp/core/quality_feedback.py",
+      "sha256": "d1061ba91af7c41cc91ec9b421a4f327330429a7fc9d5130f76a0511343e82d5",
+      "bytes": 5136
+    },
+    {
+      "path": "exp/core/retrieval_cache.py",
+      "sha256": "4f28f3b78b947c649a9f8e4d2c9d5448c2bfa9995b27bbf825f128672348cbe9",
+      "bytes": 5650
+    },
+    {
+      "path": "exp/core/scoring.py",
+      "sha256": "81f900de21333d0bd94a21c8417ac4865847ccfabfc033c3162186f97d4b1573",
+      "bytes": 5777
+    },
+    {
+      "path": "exp/core/stats.py",
+      "sha256": "d66f568101aa3a89d19b2216955886db178a865a2b72c84b173002e3e3c2cdb7",
+      "bytes": 3482
+    },
+    {
+      "path": "exp/dispatcher.py",
+      "sha256": "2a59ea36871d8143912982a60a09ad65618f1b05535d03c7ef81494bdf310a9d",
+      "bytes": 47489
+    },
+    {
+      "path": "exp/dl_glm.py",
+      "sha256": "ea1a0cddf11cf435bb8810e471c3c137d0c8745802e9c78eb7ce2cd0193f01fe",
+      "bytes": 390
+    },
+    {
+      "path": "exp/dl_glm2.py",
+      "sha256": "f6edb85c38dc7521f3bfe7472376fa2d69d2a4163ca68b1366ebcef260c607ab",
+      "bytes": 428
+    },
+    {
+      "path": "exp/dl_shard2.py",
+      "sha256": "e67e2d5de3baa6f81bf3342b61899241950769be4cc6616dfe5526bf626b3934",
+      "bytes": 827
+    },
+    {
+      "path": "exp/evaluate_bert_feedback_study.py",
+      "sha256": "5d6beb62e2c77f555ec59d9823bbfda0f0ad3965e171758568ed47b10218fc0d",
+      "bytes": 3478
+    },
+    {
+      "path": "exp/evaluate_label_comparison.py",
+      "sha256": "9d8bc9180621547b8052b67bf6a25345751ff674cc021346bccf4c3e8c443d8f",
+      "bytes": 18115
+    },
+    {
+      "path": "exp/evaluate_laya_acceptance.py",
+      "sha256": "ecd99e7aee2987c659600892d7735f91c7f81e7f47aa82075ba287ee49b9b9dc",
+      "bytes": 11322
+    },
+    {
+      "path": "exp/evaluate_laya_relaxed_comet.py",
+      "sha256": "4acbc8f2538314af28bae39710fe55c3438b44d1b5652cd429f56887b7549401",
+      "bytes": 4540
+    },
+    {
+      "path": "exp/export_human_eval.py",
+      "sha256": "4346cbf1b6af725818560972ed24af4f3330c66ce6efa904b3e0636fbb971b06",
+      "bytes": 45736
+    },
+    {
+      "path": "exp/fetch_shard2_until_done.sh",
+      "sha256": "842763c592fd89c150ce7672e131602c8a61eb3d3c12088a5c296ea4bdf59de2",
+      "bytes": 2143
+    },
+    {
+      "path": "exp/free_gpu.sh",
+      "sha256": "aaf358ebdfff5e4357b2c77f506732ac0fcb14ead21afcbed442ec733965e53e",
+      "bytes": 1164
+    },
+    {
+      "path": "exp/human_eval/README.md",
+      "sha256": "8423ae99aac44937ef32744848e90307eb2ad1fb212cc9a35481010fe43e29b6",
+      "bytes": 3467
+    },
+    {
+      "path": "exp/inspect_acceptance_data.py",
+      "sha256": "6e58d46833b7f3fe3c4a08c3d1100dd5d957119804f6540b624f7998d01d0b3b",
+      "bytes": 4817
+    },
+    {
+      "path": "exp/investigate_laya_acceptance.py",
+      "sha256": "4bae424008c8c1e721d4ca9d6fec35cd65ba2effc7927a5f6de7c0568065f98a",
+      "bytes": 8976
+    },
+    {
+      "path": "exp/laya_acceptance_common.py",
+      "sha256": "92046145644604b617c96024c0d8eacacaa954ecdf4ba459e9c3930c4c3eba7e",
+      "bytes": 9783
+    },
+    {
+      "path": "exp/laya_relaxed_bleu_control.py",
+      "sha256": "37fd537bd953999177ecec7c79479723881d2706fabacfa3f6c274ea17c4722b",
+      "bytes": 1013
+    },
+    {
+      "path": "exp/laya_relaxed_flow.py",
+      "sha256": "97286818b271cb3f07e0d7fc18addb60271f95e5d1eaf1686982e091df108d88",
+      "bytes": 18611
+    },
+    {
+      "path": "exp/laya_relaxed_policy.py",
+      "sha256": "66b5f3725db659278af79b4995f291f67abe402f0219a6fa0b06a9ebff6ad556",
+      "bytes": 2690
+    },
+    {
+      "path": "exp/make_plots.py",
+      "sha256": "0b440669db562fe3b282ba950646ddb2334e05f71f839fcba516d12b7d17e62d",
+      "bytes": 50850
+    },
+    {
+      "path": "exp/onpolicy_bert_data.py",
+      "sha256": "18237832e512ce44ec99d9b88c76ca30c85e678fba72722bef6cb7ea276801e6",
+      "bytes": 6698
+    },
+    {
+      "path": "exp/onpolicy_bert_report.py",
+      "sha256": "4ac07850f0704df9eabae896c71ea8e520bab99d10c9bab3a69f58277453fc6a",
+      "bytes": 12291
+    },
+    {
+      "path": "exp/onpolicy_bert_train.py",
+      "sha256": "ed846f6054f3c3dffe971559b14f8f4989d3272ddd2bebbb2942099f76197a35",
+      "bytes": 10425
+    },
+    {
+      "path": "exp/preflight_queue.py",
+      "sha256": "805d6bf63121c6771cdf09ef638f385566a07283c9b8c7a3e43d274f3b54f66c",
+      "bytes": 5260
+    },
+    {
+      "path": "exp/preflight_semantic_teachers.py",
+      "sha256": "013901f2a10fe2724e8549992db7869c12596b2b025c791e16339d8b6a44c64e",
+      "bytes": 3079
+    },
+    {
+      "path": "exp/prepare_acceptance_training.py",
+      "sha256": "5b063e0d8723829ddc113373033f0dafd295f234074f22af21211f297620aa6c",
+      "bytes": 9883
+    },
+    {
+      "path": "exp/prepare_expanded_laya_calibration.py",
+      "sha256": "afe1ea0b7576292bd500870f5246985717cbb0720c366ef4fe6ad0e7ca643e4f",
+      "bytes": 5532
+    },
+    {
+      "path": "exp/prepare_laya_blind_review.py",
+      "sha256": "809d313260a8e2dc8ab68278fde9ff71e74fce1852addd4b8486c60c4f62a5f8",
+      "bytes": 4628
+    },
+    {
+      "path": "exp/probe_determinism.py",
+      "sha256": "31640ce08ffa8b92c9abe0131ae6a6fb06ca81da128f187b6eec12f105e2f250",
+      "bytes": 5234
+    },
+    {
+      "path": "exp/rejudge_pairs.py",
+      "sha256": "b0c28f9aec538cdbdac13c224e7b87103169f8f37b3ddcb3c9ee9d1a139eef96",
+      "bytes": 13722
+    },
+    {
+      "path": "exp/relabel_experience.py",
+      "sha256": "fdfe6e10dd0acd25d69d24bc585b36f6b79b188e33c482c30be3fcf90d6b5a25",
+      "bytes": 6159
+    },
+    {
+      "path": "exp/relabel_semantic_training.py",
+      "sha256": "4b4f9f91814b105132e224ae65210224ccc40543853c2a15fe70061b11297133",
+      "bytes": 4192
+    },
+    {
+      "path": "exp/relabel_semantic_training_api.py",
+      "sha256": "b261e8d71f21721d4fdd0648acac6e410f22b310959d26df318deaf3b63bec90",
+      "bytes": 5175
+    },
+    {
+      "path": "exp/report_acceptance_label_review.py",
+      "sha256": "f877b4ecf69331835d0eee78d61b84e7123cd66b370e985f4553eb6a1cfe8e27",
+      "bytes": 4022
+    },
+    {
+      "path": "exp/report_bert_feedback_study.py",
+      "sha256": "b689ab5be16d7a9885f0978687d77788dd1a5123cdc448054b7bafe870e3be89",
+      "bytes": 8260
+    },
+    {
+      "path": "exp/report_laya_acceptance.py",
+      "sha256": "96d35f9c3a7b64608b624de39bbca086752e03e4f2c0bb85f66984f607c5bac5",
+      "bytes": 8805
+    },
+    {
+      "path": "exp/report_laya_relaxed_flow.py",
+      "sha256": "0a801d98e70847fefd617355c35ec8373548de8fca39dc2fef3bf8f40fd6a59d",
+      "bytes": 12824
+    },
+    {
+      "path": "exp/reports/ACCEPTANCE_DATA_READY.md",
+      "sha256": "38a180f0fdb4f21b32cf8e18d093ee689ca87d779e43d34b537592302b4aeba2",
+      "bytes": 3156
+    },
+    {
+      "path": "exp/reports/ACCEPTANCE_DATA_V1.md",
+      "sha256": "6f0fa5e2d3c7dc52245c4b44c2c16ff3ed49b7045a7bb2d73b04660ea7591ecc",
+      "bytes": 3851
+    },
+    {
+      "path": "exp/reports/ACCEPTANCE_DATA_V2.md",
+      "sha256": "bcf2935766dc0a81d19e2d5ff60388763639146533e5e6b71b7b312c94fb154b",
+      "bytes": 5268
+    },
+    {
+      "path": "exp/reports/ACCEPTANCE_DATA_V2_INTERIM.md",
+      "sha256": "403433e5a3e95a229a78fe0268359bcb18abf04efb4a445f6e24bc76a4fcb9d6",
+      "bytes": 1286
+    },
+    {
+      "path": "exp/reports/ACCEPTANCE_LABEL_REVIEW.md",
+      "sha256": "6c9adab89399300a0a41dee14eff3d497c4e59e2f96eb0510776bbeb230f7d25",
+      "bytes": 67543
+    },
+    {
+      "path": "exp/reports/BERT_FEEDBACK_STUDY.md",
+      "sha256": "e35ea1932e972a6a3746d47169ca61e4d96858b11555e7d0ffd2f1833f8979c0",
+      "bytes": 4458
+    },
+    {
+      "path": "exp/reports/BERT_ONPOLICY_STUDY.md",
+      "sha256": "3affaf105a790cd5b959869875a1ea939fa6052425ab375861cd90fd2939707c",
+      "bytes": 6307
+    },
+    {
+      "path": "exp/reports/E3_FINAL_RESULTS.md",
+      "sha256": "2910b7736d246ecb482ee392f11d1a8e82199546a42a985a813b1259befb8038",
+      "bytes": 7531
+    },
+    {
+      "path": "exp/reports/FINAL_RESULTS.md",
+      "sha256": "055a0232ab567100462d38995a813d366e915c490428dea4a8ed22b1eb312939",
+      "bytes": 6511
+    },
+    {
+      "path": "exp/reports/HANDOFF.md",
+      "sha256": "42efcfa3a15bb1d42f89475b92aecb409f16b50ed0dd5aa4575231c08d6f86a6",
+      "bytes": 8282
+    },
+    {
+      "path": "exp/reports/LAYA_ACCEPTANCE_RESULTS_ZH.md",
+      "sha256": "50d2ab62a139e1c28550c756dccdc23acf60017469faa3fcbc2d69fa7097c3cf",
+      "bytes": 3053
+    },
+    {
+      "path": "exp/reports/LAYA_ACCEPTANCE_VALIDATION.md",
+      "sha256": "34d5dc9c5810fc84a4d3c757ab45ef5e2a012aeb7469a0ebee7234e26b2ddfbb",
+      "bytes": 1480
+    },
+    {
+      "path": "exp/reports/LAYA_FAILURE_INVESTIGATION.md",
+      "sha256": "43c53dd2412b9f6e55f4198556baaa972f0be5d06fd818a47c40867172ddc9c7",
+      "bytes": 8753
+    },
+    {
+      "path": "exp/reports/LAYA_LABEL_COMPARISON.md",
+      "sha256": "dbf32a72df058cc3a4187caf16ae1f3e630ad459a38b9604f1a12ab4a3658d83",
+      "bytes": 3100
+    },
+    {
+      "path": "exp/reports/LAYA_LABEL_COMPARISON_CONCLUSIONS.md",
+      "sha256": "62c6d9cc1f96cec6d56a0172b4934ed99764b8561da2d6ee63383f867843d5f2",
+      "bytes": 4876
+    },
+    {
+      "path": "exp/reports/LAYA_LABEL_COMPARISON_WORKFLOW.md",
+      "sha256": "604f5d3f63afe42b27291ab42c7487131a4f7bdfa1c9321246867367f81d2462",
+      "bytes": 3368
+    },
+    {
+      "path": "exp/reports/LAYA_RELAXED_FLOW_RESULTS.md",
+      "sha256": "5949690292708c2892686a7525ff8298ffdee395098a7eb12fd8ef8d0798fe98",
+      "bytes": 3651
+    },
+    {
+      "path": "exp/reports/LAYA_SAFE_ACCEPTANCE_AND_COMET.md",
+      "sha256": "a22eba501c2d74dde3b6ad0f0d959a3703de1be5a8c10137a58ff26311090333",
+      "bytes": 3302
+    },
+    {
+      "path": "exp/reports/OPTIMIZED_FEEDBACK_V1.md",
+      "sha256": "bba921295ae9d05716b4a50577689a69c9b57ce89bb76d133110255735c07956",
+      "bytes": 5130
+    },
+    {
+      "path": "exp/reports/OPTIMIZED_FLOW_VALIDATION.md",
+      "sha256": "bc26ca795575aaa88a1ae7f9135e7e0b6aa5601be565f3e5e17816dcaa8df85e",
+      "bytes": 3777
+    },
+    {
+      "path": "exp/reports/audit_batched_pipeline.md",
+      "sha256": "fdf0352baacc0f894063ae6dd8ae6d7b73dbc2e649c4c7cb11223ab4873c0d6f",
+      "bytes": 24107
+    },
+    {
+      "path": "exp/reports/glm4_nfs_root_cause.md",
+      "sha256": "a462ffe93870e83f50cad90ba456b8971432d4a52720b35d92beb4642ec65686",
+      "bytes": 11138
+    },
+    {
+      "path": "exp/reports/judge_bottleneck_diagnosis.md",
+      "sha256": "d993c7be2ca49d9417092ce1ee8532a7d9765ba1815f3a5609c5dc668a01b8cd",
+      "bytes": 35004
+    },
+    {
+      "path": "exp/reports/phase78_scripts.md",
+      "sha256": "485c070a079521b74394c2dbc2588bb5842b5efa980f51b796ed02c3ce463f99",
+      "bytes": 20637
+    },
+    {
+      "path": "exp/reports/progress.md",
+      "sha256": "f3dd073481d797aa02b9da35005d752f79739f875ea2851da26d14561946bc5f",
+      "bytes": 101577
+    },
+    {
+      "path": "exp/reports/v6_dev_evidence.md",
+      "sha256": "049cd0307c54ba64aa996654f7d74fe286f0975f5fbd396e0f8b35f0c5e6cdf6",
+      "bytes": 8912
+    },
+    {
+      "path": "exp/repro_gate.py",
+      "sha256": "2bca1927628f80dcab31bcca31a419b47542ac599e31859f3daca50bcb53e60b",
+      "bytes": 6236
+    },
+    {
+      "path": "exp/run_ablation_chain.sh",
+      "sha256": "541d416f4fb04b453c109b50b746615a3c8750cfa51768e3f72b1c2cb9a0b077",
+      "bytes": 1434
+    },
+    {
+      "path": "exp/run_accumulation.py",
+      "sha256": "601c7ea4d8d742e838901a04dfd20bc2d546af288c91c205a7d4973862283160",
+      "bytes": 46918
+    },
+    {
+      "path": "exp/run_build_all_models.sh",
+      "sha256": "a98c981e5658acad11b08e46da38b2c0d6cce055574fa16f3a720a699e18212a",
+      "bytes": 550
+    },
+    {
+      "path": "exp/run_dev_gate.sh",
+      "sha256": "32abbe23ef6f410be1a1e0cb5c3720f8453305f1a6e23ffac7e2f142cf0d0669",
+      "bytes": 2444
+    },
+    {
+      "path": "exp/run_experiment.py",
+      "sha256": "f46f9a6177c455e6421ce0d66d832d94169c41c5dc93fac444bee5fdc2ce3da4",
+      "bytes": 67826
+    },
+    {
+      "path": "exp/run_gpu3_tail.sh",
+      "sha256": "180f32f9199a6c3e80408bd02095f1a2ef0bbb23768897ce52d5d0c3ccbb394a",
+      "bytes": 713
+    },
+    {
+      "path": "exp/run_label_comparison_pipeline.py",
+      "sha256": "afee800b68a7adf0249d5af8c1af331bafdbdb40b86daceaa97bf52f6e90d3f1",
+      "bytes": 1432
+    },
+    {
+      "path": "exp/run_laya_acceptance_job.py",
+      "sha256": "3ea417b18925b0faba6114ed3e6607023bce7ba73158460e8f726941b7562bd4",
+      "bytes": 1758
+    },
+    {
+      "path": "exp/run_laya_relaxed_bleu_job.py",
+      "sha256": "ceb4397c4178167e94fa53bab363159143fc8c8f04be44d8246eedf6ec2c80d2",
+      "bytes": 1022
+    },
+    {
+      "path": "exp/run_laya_relaxed_job.py",
+      "sha256": "be620c372fc76ecc6a3e97c88b5bcf4adfabb305a19ae001b2fb95bab41b52c3",
+      "bytes": 1353
+    },
+    {
+      "path": "exp/run_main.sh",
+      "sha256": "cfa47bb850439b195a516165318d6c0eeec067651b640ed8f44a23fa132e8ce8",
+      "bytes": 1545
+    },
+    {
+      "path": "exp/run_main_chain.sh",
+      "sha256": "b046e162015bbc892bd6f6c7b2915ea24e3ec7db5791d334636fbace8a168b5a",
+      "bytes": 989
+    },
+    {
+      "path": "exp/run_phase0.py",
+      "sha256": "4c00885f553b79a0509e20173c2237529d7510a87b78f2f8dd83dc60845a2765",
+      "bytes": 15389
+    },
+    {
+      "path": "exp/run_rebuild_llama_giga.sh",
+      "sha256": "f34c42ae2cbb9de2814d3d6955bd14988529c95c3f1b0cbd8621ab7906be3f00",
+      "bytes": 716
+    },
+    {
+      "path": "exp/run_rebuild_llama_retry.sh",
+      "sha256": "ead61157ef973bd165643b3de96496cb6e89be64776e3e83a371abd3a332c03b",
+      "bytes": 1593
+    },
+    {
+      "path": "exp/run_rebuild_short.sh",
+      "sha256": "f4f258441b0053cc88c34ae66896b3949393200ea0df22611b3b9736360fadfe",
+      "bytes": 924
+    },
+    {
+      "path": "exp/run_repro_gate.sh",
+      "sha256": "3b4444844cd356ed9e2d2694c08cb65dd38bf71aa848903905ec299ae6d57e30",
+      "bytes": 1150
+    },
+    {
+      "path": "exp/run_scaling.py",
+      "sha256": "8e8c8779a0e8847e8fbad94bb23e0137f6b67bcdff9b19356bb33d130f4f93bb",
+      "bytes": 28974
+    },
+    {
+      "path": "exp/run_stopping_diagnostics.py",
+      "sha256": "5094b554b5a9e30db8a05616d1c3ddc35284bf1fb9393b8dd8145eea1adf2511",
+      "bytes": 33466
+    },
+    {
+      "path": "exp/select_accept_threshold.py",
+      "sha256": "9b2b51fc5ffb79255abd3b3ec4bffece1db3f3166f8ffe23e3fe947764ffc36e",
+      "bytes": 9804
+    },
+    {
+      "path": "exp/semantic_label_common.py",
+      "sha256": "c910a8a054b0ba2ddea796e8a1d8461a4b9d806ea9b58bbe4e0ad389a3f852be",
+      "bytes": 3871
+    },
+    {
+      "path": "exp/semantic_label_pilot.py",
+      "sha256": "05e83bb2b4a32ba3ccbe84e61bc8360147522a2d3f21a74d9f0e179c87fce5ac",
+      "bytes": 10503
+    },
+    {
+      "path": "exp/supervisor.py",
+      "sha256": "d10cb2ed8a7d006a4340218d40034f22c7ed3434e0d8ed2b1534d11f6900e828",
+      "bytes": 13011
+    },
+    {
+      "path": "exp/test_label_comparison_protocol.py",
+      "sha256": "3d26a649521932ee51cbcb6801f69c75993a1b69bf1cf71b90463634bbf0afe0",
+      "bytes": 2252
+    },
+    {
+      "path": "exp/tests/test_accept_gate.py",
+      "sha256": "de80c48ac77dff4b8d32a5aa27da2726cbcb991feb3abb9c3ef44519b705cc50",
+      "bytes": 8139
+    },
+    {
+      "path": "exp/tests/test_acceptance_data.py",
+      "sha256": "826a00371b37097da0c7c246798fa76b282b062b4591419b26555f643d9cdf30",
+      "bytes": 2222
+    },
+    {
+      "path": "exp/tests/test_accumulation_gaps.py",
+      "sha256": "9e80e4bbbf692914f7829b044a3ec54c652a92157da7a74a1718b92b0f2705f5",
+      "bytes": 42407
+    },
+    {
+      "path": "exp/tests/test_accumulation_loop.py",
+      "sha256": "60699d74c249a99aa3005afdf365958de99e00064241c3bcaf44668d042ac24e",
+      "bytes": 7189
+    },
+    {
+      "path": "exp/tests/test_bert_feedback_study.py",
+      "sha256": "44d7d33191e9e8044181dee5747f9d812ea4c227edabc10c946bf0f769b42fe5",
+      "bytes": 1058
+    },
+    {
+      "path": "exp/tests/test_config_hash_legacy.py",
+      "sha256": "6bb8f63988407ae76c9d16bc2f1327dffcee6e44642d0903d2a938ee91e56bfb",
+      "bytes": 4514
+    },
+    {
+      "path": "exp/tests/test_experience_transitions.py",
+      "sha256": "94ca7ffc75737c7669bee8b4b18ec9d4db719c2c3a31645bd70cd20bea245e24",
+      "bytes": 2346
+    },
+    {
+      "path": "exp/tests/test_human_eval_export.py",
+      "sha256": "8fc5854e85a4669d9e1674cc9714eab0c92535b215a0e16e9e50ba4f388ad8f5",
+      "bytes": 29771
+    },
+    {
+      "path": "exp/tests/test_invariants.py",
+      "sha256": "af705cf11833a54d8efadf19b2af53447c42619f89e4bcf0c655f97fe72e95f3",
+      "bytes": 9935
+    },
+    {
+      "path": "exp/tests/test_judge_identical_pair.py",
+      "sha256": "7642f43c8024bf294e4397081753f8fbfa67c1570a6d27bfc554906ce5bc24fe",
+      "bytes": 7785
+    },
+    {
+      "path": "exp/tests/test_laya_acceptance.py",
+      "sha256": "087551e9a36208fa4355a47d642f3443729b30e55da0b1286cf0d39745d5d3b9",
+      "bytes": 1495
+    },
+    {
+      "path": "exp/tests/test_laya_relaxed_flow.py",
+      "sha256": "7e425ccede02b225861f4aef18f2829b27023a1b75a168e6bbdeff456f5ef060",
+      "bytes": 1894
+    },
+    {
+      "path": "exp/tests/test_laya_safe_acceptance.py",
+      "sha256": "ebb56c68337a631cb4f02e9d1c31be6f2df2b835e1ad64e45814a1ff2738ac04",
+      "bytes": 891
+    },
+    {
+      "path": "exp/tests/test_onpolicy_bert_study.py",
+      "sha256": "9abf5d656abf4efd52ca214b813fc071e3b6d98a23e97c0f5485db8c65e356a6",
+      "bytes": 1260
+    },
+    {
+      "path": "exp/tests/test_optimized_feedback.py",
+      "sha256": "a534f943bf0eef2a4d74375034845afa44227b3bd9f56c32ccd39611fbe57953",
+      "bytes": 8278
+    },
+    {
+      "path": "exp/tests/test_own_source_ban.py",
+      "sha256": "b9b6fe432d66f085a5f0090abd31b8d7cbfff65b9bb3a2dc06af0db2f8423244",
+      "bytes": 4874
+    },
+    {
+      "path": "exp/tests/test_prepare_acceptance_training.py",
+      "sha256": "541b53c4e210c84feb5f0658939ea2bffe867d5b729dcef518e194f5cdd1ad6b",
+      "bytes": 1600
+    },
+    {
+      "path": "exp/tests/test_renderer_v2.py",
+      "sha256": "7de3f4e9feb95ad050af2508e5eb80c99e2cd9bb5dbb34823d6d797dee71d1f7",
+      "bytes": 7666
+    },
+    {
+      "path": "exp/tests/test_resume_equivalence.py",
+      "sha256": "eb4265f088bf3981b5d40e9ea1611e3200b23f586fbafde78d5cbb3e0bb8ec36",
+      "bytes": 9977
+    },
+    {
+      "path": "exp/tests/test_scaling.py",
+      "sha256": "b97447f82dc031156d1640619edb2e28307de647ddf4ad61990e9c5bef38c939",
+      "bytes": 40238
+    },
+    {
+      "path": "exp/tests/test_stopping_counterfactual.py",
+      "sha256": "31a98596cb5346834355352691dbc1e5233daf047e5883f71265f50d83275f13",
+      "bytes": 6526
+    },
+    {
+      "path": "exp/tests/test_supervisor_args.py",
+      "sha256": "4ee1dc51e78c9105d4f3237e865946aab36e11fae1c059815731b8f1aeed436a",
+      "bytes": 2676
+    },
+    {
+      "path": "exp/train_label_comparison.py",
+      "sha256": "5ecaf3dd5e91a4772164bb4253037bf2f4db66893e8cf0f0f7d4cff515756864",
+      "bytes": 7120
+    },
+    {
+      "path": "exp/train_laya_acceptance.py",
+      "sha256": "16ec8bb09ea3d67a7cec3f076f8429fb9c5e4641ece92b80e28a62b4f6f5f035",
+      "bytes": 10186
+    },
+    {
+      "path": "exp/vendor/laya/.dockerignore",
+      "sha256": "bc2b65e36d06299f1810460c957272fc339bf494a31c9e2607f7f9419682b322",
+      "bytes": 356
+    },
+    {
+      "path": "exp/vendor/laya/.envrc",
+      "sha256": "1d26c74fd25a4c3dbb09e029fc609588da499fd4af2a41c88f6316c7f8c54cf1",
+      "bytes": 10
+    },
+    {
+      "path": "exp/vendor/laya/.gitattributes",
+      "sha256": "b124dc7054ac5ddb8f376e490038df001be42421802d3547e56808242a444f04",
+      "bytes": 901
+    },
+    {
+      "path": "exp/vendor/laya/.github/ISSUE_TEMPLATE/bug_report.yml",
+      "sha256": "e30825318cb3449c690457f44e2b0940ff8dd674b0c6bb0f0123d5b52d9bcb89",
+      "bytes": 2233
+    },
+    {
+      "path": "exp/vendor/laya/.github/ISSUE_TEMPLATE/config.yml",
+      "sha256": "ef84204f1ee20554bc07d642787410e581c9570e6c3d2ed83dc9a3e8061f8299",
+      "bytes": 329
+    },
+    {
+      "path": "exp/vendor/laya/.github/ISSUE_TEMPLATE/feature_request.yml",
+      "sha256": "6f0b4fd07e46b6cd0f1a20c8c4bdc34b3f5f1181f24b712582173c4637518acc",
+      "bytes": 1569
+    },
+    {
+      "path": "exp/vendor/laya/.github/PULL_REQUEST_TEMPLATE.md",
+      "sha256": "54d27cb29179f567c41edefc7f75f28e52afd024d2a0dc6adcb8535e28f872b6",
+      "bytes": 520
+    },
+    {
+      "path": "exp/vendor/laya/.github/dependabot.yml",
+      "sha256": "6734bab6f678dcb840a7518aefd61a5730aed494aa66c6359161279f1e04dcd3",
+      "bytes": 466
+    },
+    {
+      "path": "exp/vendor/laya/.github/workflows/ci.yml",
+      "sha256": "4e5f4bb0c2f191bd0ef01b5ee500d817986ad3101c6ffc08c9d966330a596c5a",
+      "bytes": 13274
+    },
+    {
+      "path": "exp/vendor/laya/.github/workflows/docker.yml",
+      "sha256": "baee55190817eea7bd3733a190b873bafa9f491d4534f649cf39a6b145904b96",
+      "bytes": 6222
+    },
+    {
+      "path": "exp/vendor/laya/.github/workflows/docs.yml",
+      "sha256": "3e20e32aba7473c6c56d97475d81ec31aa21bdd47fe1f42b949e69267f9c2bce",
+      "bytes": 2464
+    },
+    {
+      "path": "exp/vendor/laya/.github/workflows/evals.yml",
+      "sha256": "9c9c3d1485d4a039d26367f101bc101128713d19e99a6c10f800aebbdf664518",
+      "bytes": 1667
+    },
+    {
+      "path": "exp/vendor/laya/.github/workflows/release.yml",
+      "sha256": "056b6ed79f5b7a9da0872171b4895b2d3943de3f9d4042fa87714f73959aa5f5",
+      "bytes": 4388
+    },
+    {
+      "path": "exp/vendor/laya/.github/workflows/security.yml",
+      "sha256": "ffd16c57121d36dc4a329097b50cbc2111b481040dcbe3db1f1cce38bf5667a7",
+      "bytes": 4837
+    },
+    {
+      "path": "exp/vendor/laya/.gitignore",
+      "sha256": "e494d0fd35ccd6c5daada1cda54fe40ffcd7cb060af568bbd5e817f96e21c393",
+      "bytes": 1114
+    },
+    {
+      "path": "exp/vendor/laya/AGENTS.md",
+      "sha256": "e5937e8d434525534590afe8a881feff23f2b0e25cb509c6de785dae495e3183",
+      "bytes": 2782
+    },
+    {
+      "path": "exp/vendor/laya/BENCHMARKS.md",
+      "sha256": "1180c5babf599380d8ddffd23f13cd1d11e0df30cdb5b55be08b89b16dc75a1d",
+      "bytes": 22068
+    },
+    {
+      "path": "exp/vendor/laya/CODE_OF_CONDUCT.md",
+      "sha256": "c3bb16f0269b59721291f9cbce8c829275d4b089db9b44a0c0d28b2e26bc4f21",
+      "bytes": 5217
+    },
+    {
+      "path": "exp/vendor/laya/CONTRIBUTING.md",
+      "sha256": "8b575160f47b0ce0d5df5117a46828fcfe7bd5d895587a2eeaf73a4fda900411",
+      "bytes": 5323
+    },
+    {
+      "path": "exp/vendor/laya/Dockerfile",
+      "sha256": "f89aee0ff0c0a6feb07f8291e5286b003c6d61410a5a1eae06bf5508ab6b1bdd",
+      "bytes": 2433
+    },
+    {
+      "path": "exp/vendor/laya/LICENSE",
+      "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+      "bytes": 10173
+    },
+    {
+      "path": "exp/vendor/laya/README.md",
+      "sha256": "051dd4af3383b41e1a687b90faeee4203fd2182db247c87dd82dafc02a0622fd",
+      "bytes": 65447
+    },
+    {
+      "path": "exp/vendor/laya/assets/benchmark_comparison.png",
+      "sha256": "78e4b926bfca3950ff5441d1030a1453515973fbe5d7dd70a1c764a81f0d3d38",
+      "bytes": 467466
+    },
+    {
+      "path": "exp/vendor/laya/assets/devto_cover.png",
+      "sha256": "6fc2594a85ebc0a80495447910a5108edb6ff81d0976442f7aa8493814f0ee4b",
+      "bytes": 87148
+    },
+    {
+      "path": "exp/vendor/laya/assets/laya_benchmark.png",
+      "sha256": "e01e49f0d842b4616e44c4c9a0feb92a9ae45efeb533f8f838888715dc89c2b9",
+      "bytes": 260892
+    },
+    {
+      "path": "exp/vendor/laya/assets/laya_benchmark_common.png",
+      "sha256": "183b0b17e8d90e091582e415d9f1da0ef34b40c3db6ccd2c8bbfd2b9232b95a6",
+      "bytes": 278159
+    },
+    {
+      "path": "exp/vendor/laya/assets/laya_vs_jev.png",
+      "sha256": "5c06517ea7f3e5f3f84873ddaa3cb470f101ad0276f921c58886f8fb12fbe0a8",
+      "bytes": 216412
+    },
+    {
+      "path": "exp/vendor/laya/assets/laya_vs_jev_full.png",
+      "sha256": "ee47b751d524a0bb65159e026141b4ce70cc83d03b14df8ec68afbc7bcdb95b3",
+      "bytes": 487005
+    },
+    {
+      "path": "exp/vendor/laya/assets/logo-lockup-dark.png",
+      "sha256": "e683b423cf4f13961fced54a29fad6bb8bb733a0bfc28960c011f8b9f773ca7c",
+      "bytes": 27666
+    },
+    {
+      "path": "exp/vendor/laya/assets/logo-lockup-dark.svg",
+      "sha256": "40c23ec9db5837c09e5ef7d6dc46ffda8eda28f50d2040936e23e882b9c46b93",
+      "bytes": 1590
+    },
+    {
+      "path": "exp/vendor/laya/assets/logo-lockup.png",
+      "sha256": "e0235069e914c7889612fcba8b0a8c82133a6ee8a871c9076e867c22fa156f4d",
+      "bytes": 26761
+    },
+    {
+      "path": "exp/vendor/laya/assets/logo-lockup.svg",
+      "sha256": "a1f8e8b98fbcc7cd410e42ba997548c01fe780217d82678a38d24a39e6365821",
+      "bytes": 1590
+    },
+    {
+      "path": "exp/vendor/laya/assets/logo-mark-ink.png",
+      "sha256": "f542388fb4ddaf5f1afe44db8fead9303f75ba38913a0b94654976a89c6f6b35",
+      "bytes": 17378
+    },
+    {
+      "path": "exp/vendor/laya/assets/logo-mark-ink.svg",
+      "sha256": "c95f251f6e7fe888995763645d8ad351323f64fa0eff7d8d17f65aac90e0108c",
+      "bytes": 1320
+    },
+    {
+      "path": "exp/vendor/laya/assets/logo-mark-mono.svg",
+      "sha256": "c8d281d8a6c9ae3d0c2864e291ce9a463f50f8f52b5ef1b271d3c277b7a75c28",
+      "bytes": 1380
+    },
+    {
+      "path": "exp/vendor/laya/assets/logo-mark.png",
+      "sha256": "bb04c3ec2afbf455d81f73512e79fce1bc910444e3258335e66305d3ab969367",
+      "bytes": 17962
+    },
+    {
+      "path": "exp/vendor/laya/assets/logo-mark.svg",
+      "sha256": "377539eb0f4255bc27fb53afffaa1b9e1acffafa4f3699c6a673dafd8b7bd870",
+      "bytes": 1320
+    },
+    {
+      "path": "exp/vendor/laya/assets/long_context_8192.png",
+      "sha256": "a9095108e27b41309da81db85b764c8196633c7a299838d5c4a534005b7e735e",
+      "bytes": 100980
+    },
+    {
+      "path": "exp/vendor/laya/assets/make_logo.py",
+      "sha256": "efe916fdc2781c5cbbd803fd4d42afd73b4c22ea11f89e44e033e907647f3c0a",
+      "bytes": 5627
+    },
+    {
+      "path": "exp/vendor/laya/benchmarks/bench-rtx4070.png",
+      "sha256": "45f076df8de2f611145a72d57e49273e533c7c0cf9913417e24c0b358b810354",
+      "bytes": 112986
+    },
+    {
+      "path": "exp/vendor/laya/benchmarks/bench_fast.py",
+      "sha256": "607808f2097621e5caa95de7db5c17cb57c3c585ce8564ed6b9b393bbd36ec48",
+      "bytes": 7443
+    },
+    {
+      "path": "exp/vendor/laya/benchmarks/bench_predict_batch.py",
+      "sha256": "1f93297ebc5190d763d87fd32ad906855bf911dbfdf0137dcbe81b39ebc31552",
+      "bytes": 13156
+    },
+    {
+      "path": "exp/vendor/laya/benchmarks/parity_fast.py",
+      "sha256": "d78d057f2ef05535c4661ef6a60298307f41d1498dc14aacc890b10e02bc9ef8",
+      "bytes": 6797
+    },
+    {
+      "path": "exp/vendor/laya/benchmarks/plot_results.py",
+      "sha256": "5410af5e4c6fa0b910138abce985364a480aaf25790e21b985b24ab8e3a024bc",
+      "bytes": 3559
+    },
+    {
+      "path": "exp/vendor/laya/benchmarks/results-consistency-rtx4070.json",
+      "sha256": "c4752bd67ec408f3da7764f7bb9a56546260b5b2b545e70bb817c7e89620ece6",
+      "bytes": 525
+    },
+    {
+      "path": "exp/vendor/laya/benchmarks/results-router-rtx4070.json",
+      "sha256": "7df851303ec5edc7b6eb9e25d93d92cd0b4ae2d83d89f06d9e3624bb8316289e",
+      "bytes": 1310
+    },
+    {
+      "path": "exp/vendor/laya/benchmarks/results-rtx4070.json",
+      "sha256": "24489220cab2da7a05cd6e96d40ceff2c6eedcf2a1d2fc9a16793cbe3bf6770c",
+      "bytes": 4837
+    },
+    {
+      "path": "exp/vendor/laya/compose.cuda.yaml",
+      "sha256": "a2dfc1c4709edb2d3fe3e4660873902f52d3918ed93c0a14144a349fbd2d1cd8",
+      "bytes": 927
+    },
+    {
+      "path": "exp/vendor/laya/compose.example.yml",
+      "sha256": "b4d3429c2283c7096c47337837bd260013f9e9107883c3d3c468d1ec17dda3eb",
+      "bytes": 1240
+    },
+    {
+      "path": "exp/vendor/laya/compose.http.yaml",
+      "sha256": "6f2cc6a18110b0e8b12f729db5fda31de19c67de175c0a8cf09bedec04fbe6fb",
+      "bytes": 3394
+    },
+    {
+      "path": "exp/vendor/laya/compose.spark.yaml",
+      "sha256": "9e1132af0800b1ae15ae93c41b4cd6136df310edd99b100b36391b7eae335402",
+      "bytes": 1226
+    },
+    {
+      "path": "exp/vendor/laya/compose.yaml",
+      "sha256": "7027c05c87794a3114dd356925493897cc12ec33994b2432d25e8f98d2129206",
+      "bytes": 725
+    },
+    {
+      "path": "exp/vendor/laya/docker/check_torch.py",
+      "sha256": "c7cfa3eebde54e48d4eb481b88e986010366a7b1859b33735b0ee21ed143e523",
+      "bytes": 3023
+    },
+    {
+      "path": "exp/vendor/laya/docker/entrypoint.py",
+      "sha256": "b4bd3eaa1a11166f252232176816793c98fb6417ac2b0b404e4661c42bf80cee",
+      "bytes": 1003
+    },
+    {
+      "path": "exp/vendor/laya/docs/.nav.yml",
+      "sha256": "83f97c39c8462d3ab60a4a3c8bdbd69048cd6dd4bd6a4272552682930a0edc63",
+      "bytes": 444
+    },
+    {
+      "path": "exp/vendor/laya/docs/benchmarks.md",
+      "sha256": "460b10ce0c4e785c76c2c6a0a5e291f12329c8a70260acf6ff633316e65ef20a",
+      "bytes": 5582
+    },
+    {
+      "path": "exp/vendor/laya/docs/docker-platforms.md",
+      "sha256": "06f6f3eaca6b856be6e890190143c13758b41f165d962b5e2c69c551354f0a1d",
+      "bytes": 4295
+    },
+    {
+      "path": "exp/vendor/laya/docs/docker.md",
+      "sha256": "93f5329d2ed9eec35d74b7af957d2ad3a074c807b8deb062d2f8cbe715843206",
+      "bytes": 11957
+    },
+    {
+      "path": "exp/vendor/laya/docs/evals.md",
+      "sha256": "82cf4a0eccc56c98ab7600f349ff2389520df22e7ebe720fb90efd1fe7db1dba",
+      "bytes": 4549
+    },
+    {
+      "path": "exp/vendor/laya/docs/finetune_browser_agent.md",
+      "sha256": "5f08a073ea9adf6cda65cf92f74c3264c6232f56eb7fd6b444a2899a7d5f0efd",
+      "bytes": 5347
+    },
+    {
+      "path": "exp/vendor/laya/docs/hooks/.nav.yml",
+      "sha256": "8acaacfe8e09f6f31df7fbc292451257903b2debef5668ea1205a73cf12dff51",
+      "bytes": 231
+    },
+    {
+      "path": "exp/vendor/laya/docs/hooks/api.md",
+      "sha256": "963ed7482d0f7e9c8dff119fe6018aa28d045130112cf2c28ee9dbdd1566cfb6",
+      "bytes": 16072
+    },
+    {
+      "path": "exp/vendor/laya/docs/hooks/errors.md",
+      "sha256": "17ca6617cd6f3307d35e5241f5e75abeb270f9c43d85af4c5206cb86cd2abae0",
+      "bytes": 7640
+    },
+    {
+      "path": "exp/vendor/laya/docs/hooks/examples.md",
+      "sha256": "2f8b3e78531fb353c0ca2a84647835db72fac927dfcf5e4411828cf56a6cc4e4",
+      "bytes": 9917
+    },
+    {
+      "path": "exp/vendor/laya/docs/hooks/index.md",
+      "sha256": "73249145681bc2708c5d223bcf56387f9c1fb8bf98604aad792a982ffd56ef27",
+      "bytes": 6658
+    },
+    {
+      "path": "exp/vendor/laya/docs/hooks/lifecycle.md",
+      "sha256": "6b5c4915c284bf930a4feb075607c0c775388f8b8b28183eef1056dd7a057b79",
+      "bytes": 10409
+    },
+    {
+      "path": "exp/vendor/laya/docs/hooks/patterns.md",
+      "sha256": "0c503e0961219bfb0f9959385b4989410e4d090eb6808862022f568047a60e86",
+      "bytes": 12159
+    },
+    {
+      "path": "exp/vendor/laya/docs/hooks/tracing.md",
+      "sha256": "b590baf576b8e96c0a752bc9c4c9f2d29809398e610f9159ef07a41ac1e241ff",
+      "bytes": 5319
+    },
+    {
+      "path": "exp/vendor/laya/docs/index.md",
+      "sha256": "89701e8f93e728d307244d9574cf741d9fc0c609eee7957496045f2044e1480d",
+      "bytes": 2080
+    },
+    {
+      "path": "exp/vendor/laya/docs/langchain.md",
+      "sha256": "26c214fcff12e03c8d096651a58c99ca97a7737626f5012f43d36eefae3bcc2b",
+      "bytes": 6073
+    },
+    {
+      "path": "exp/vendor/laya/docs/reference/.nav.yml",
+      "sha256": "d9035d9a3792260438d930787724062e8b8985cb34b42ea785b0129053b5baab",
+      "bytes": 201
+    },
+    {
+      "path": "exp/vendor/laya/docs/reference/agent.md",
+      "sha256": "c6848015f4e43375ecd17c6a6daf242a01f92f1490434b46add5f893a9089773",
+      "bytes": 329
+    },
+    {
+      "path": "exp/vendor/laya/docs/reference/helpers.md",
+      "sha256": "e00adce96f43b9611e4b9ac8f4b45c067f64cf5e12ec87eea647ef589d4bdbed",
+      "bytes": 806
+    },
+    {
+      "path": "exp/vendor/laya/docs/reference/index.md",
+      "sha256": "332ea44c9b757a245fbbb9ef99110e31aaf73a07d82f8078332a6fc047ed7162",
+      "bytes": 793
+    },
+    {
+      "path": "exp/vendor/laya/docs/reference/langchain.md",
+      "sha256": "45dc2b8e5141cc3efe8e11afb2d4326e67ee0b152d3ee12664ffda453ddd4008",
+      "bytes": 400
+    },
+    {
+      "path": "exp/vendor/laya/docs/reference/router.md",
+      "sha256": "ec82616b8c56339cbf5a130e12c3e97ae5bf918803666cb5863e40a82eed12dc",
+      "bytes": 230
+    },
+    {
+      "path": "exp/vendor/laya/docs/staged-adoption.md",
+      "sha256": "486b20f5efcd43ecfc10c7b576917e78cb22f341ca478004ff02c010900f233b",
+      "bytes": 6852
+    },
+    {
+      "path": "exp/vendor/laya/docs/structured.md",
+      "sha256": "1a884c9b20b018d616fa5fb3f43a575da8d51a031a01a84b1e295e836ccbcfe1",
+      "bytes": 5539
+    },
+    {
+      "path": "exp/vendor/laya/examples/docker/quickstart.py",
+      "sha256": "3d897438370f45be232f0c2b04655e08cfc58dd740e67c4f8ef91487843df082",
+      "bytes": 1236
+    },
+    {
+      "path": "exp/vendor/laya/examples/docker/request.json",
+      "sha256": "391b6ebececf8566f9eaa9c08a06cf4dece760410e070d87fc6ca38184de2b7b",
+      "bytes": 745
+    },
+    {
+      "path": "exp/vendor/laya/examples/hooks/README.md",
+      "sha256": "6c0a8cd2cc7a926e2f576c9a2c09bcb781fe6d5189d529e42a23a04d6b245bdd",
+      "bytes": 523
+    },
+    {
+      "path": "exp/vendor/laya/examples/hooks/audit.py",
+      "sha256": "7fa43815ced0cc305ba86f9f54561c6595532612c68a3ca3c14f5f5cd6f099ce",
+      "bytes": 1290
+    },
+    {
+      "path": "exp/vendor/laya/examples/hooks/cache.py",
+      "sha256": "95fea7a73958c6f3185dda7028e830e7e9573c3239b81eba389ea4a02a0ee271",
+      "bytes": 1215
+    },
+    {
+      "path": "exp/vendor/laya/examples/hooks/otel.py",
+      "sha256": "cd693dfebab255f6356b2fcd2899934bad67026752a7805cfc781e5150de5824",
+      "bytes": 963
+    },
+    {
+      "path": "exp/vendor/laya/examples/hooks/redact.py",
+      "sha256": "ce83a5dcf47611b5b19606bf3c17c30ce31907fea88ae62c6cc31760a59ed44e",
+      "bytes": 930
+    },
+    {
+      "path": "exp/vendor/laya/examples/langchain_quickstart.py",
+      "sha256": "98db3a1364eecb88f6c6f5051ba247dec75109e618e15b47b9951df654c2d3b7",
+      "bytes": 5499
+    },
+    {
+      "path": "exp/vendor/laya/examples/server.py",
+      "sha256": "9bd8f4537bfa6484aba4bd0727c6e442cb5e42b0861f90a81c6705b5ad1377ab",
+      "bytes": 179006
+    },
+    {
+      "path": "exp/vendor/laya/flake.lock",
+      "sha256": "7a1a61076fcb095c2ea6b1aa5bfb454bb71c6a027df100e1eef4fcb437c48ab4",
+      "bytes": 1523
+    },
+    {
+      "path": "exp/vendor/laya/flake.nix",
+      "sha256": "941c90250a5370c21025690464894ab85eb09f2f611530d58a779529db2e3f0d",
+      "bytes": 2315
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/README.md",
+      "sha256": "57e651ec4474aaa801692ccb11e62eaf570d124a76b644972e24ba4e1f76fb3a",
+      "bytes": 6281
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/examples/snake.mjs",
+      "sha256": "17a6ad7d316f33e653b29366a049ed3315361b79d2039dba1c3cb228ae907c78",
+      "bytes": 5616
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/examples/try-ml.mjs",
+      "sha256": "303ee77efc453d5153fe2d80e612ce7b4a15d3befc84efab270621fc48570eee",
+      "bytes": 1459
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/package-lock.json",
+      "sha256": "8ee0402f1727d76dfc636b2b03f28aafbe842d4bcc3dcb9820f2ffd423b57ae6",
+      "bytes": 61879
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/package.json",
+      "sha256": "e6d6a6a7f4607a5ccc29d81c0e7390d12a1a7bb4ea5339bd4c1cfe663ece4914",
+      "bytes": 715
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/scripts/export_onnx.py",
+      "sha256": "d540417e858bda28337c2ba05a50fb7ddd532b41b153f9e6cf688cfbcb7c85ff",
+      "bytes": 13044
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/src/agent.ts",
+      "sha256": "8dd50e952061d0b211077cba8f54697d4c497e93eb5a453c09c924a52ec1b7f6",
+      "bytes": 23885
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/src/common.ts",
+      "sha256": "6ac1ba667770c462b1c797bef148b9654cb118ec0be717f8a1ceecc3308c667f",
+      "bytes": 9582
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/src/email.ts",
+      "sha256": "a55e942fa65a16199735c7c33b414554cc432532a232ec4815a00fd8b5bf4676",
+      "bytes": 8444
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/src/hooks.ts",
+      "sha256": "02d2a0db1efd1e8e197ef1e4ff2dc56ded2b3e87a8672dd0cea8702b8506481e",
+      "bytes": 11137
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/src/index.ts",
+      "sha256": "e2ae28b1354cf4eb95c6fe45ab45bd0173ab857c5df8361cc6f67f910d70276e",
+      "bytes": 2436
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/src/lang.ts",
+      "sha256": "ca7ef30188e2a630da76275b79e739b80e70acac0146c9652d06d3e16bd11e63",
+      "bytes": 18900
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/src/presets.ts",
+      "sha256": "dd1e75ea978d24d0d31045820476d1d90555b78748ce9123c7f09e8d1a5e0ace",
+      "bytes": 5852
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/src/providers.ts",
+      "sha256": "69be76a62c13353401ac139b0d4b56b996a01dd788db7acdf4ba646ed3aacc2e",
+      "bytes": 21028
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/src/router.ts",
+      "sha256": "940fd6b1d163aeac5bf99dce112ab937150116afe965c838d5541ec484c8471e",
+      "bytes": 21081
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/src/shortlist.ts",
+      "sha256": "526b9f7d54908224419382e75834b7279803d6860f565f51869e200e09ba2243",
+      "bytes": 9493
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/src/structured.ts",
+      "sha256": "dd839c33e767e061e21d011e3dfbf7ee2fb76f19bea17e9eb434d060975ac489",
+      "bytes": 12563
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/src/tokenizer.ts",
+      "sha256": "63e0c2f8cbf7b90c628f0e9cafd112b2ee2fc0a723a6a9037c3b1699091c1249",
+      "bytes": 17453
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/agent.test.ts",
+      "sha256": "3ff6dee3a1c17bc8c5bbd9decc76899caa8b243f96ac5e10c2091b60239c45ba",
+      "bytes": 1101
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/answer-confidence.test.ts",
+      "sha256": "024e22f299338d3599e360fd44dbf93f6c7270ce60931ef1d27cfb32a64ae2d9",
+      "bytes": 2404
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/audit-regressions.test.ts",
+      "sha256": "c5d92b29510f0d3072fcad999ab50f544ad2fcc1e65b816d84c876ec32eab93c",
+      "bytes": 3387
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/blank-lang-routing.test.ts",
+      "sha256": "a2db9f0f554f91dda7e2c3af06b94eadc6692aa91778c966361ab88e681c2cde",
+      "bytes": 2311
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/bpe-complexity.test.ts",
+      "sha256": "8194d6c5de8f6f8a34adaeb259a208c772c4be602804d9196fdb3d89235d1051",
+      "bytes": 19302
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/bpe.test.ts",
+      "sha256": "a0dfbb95a037b33d904a1aaba1ca3376b8de7b2be313b9504e42a0f10a64f544",
+      "bytes": 3827
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/email-presets.test.ts",
+      "sha256": "d9f4f96daa0808c8cf1875eb67248f1c752ab2de72558a321cfca8d8324bdc35",
+      "bytes": 6623
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/flat-parity.test.ts",
+      "sha256": "2225bdd56001953ec6da43b1a6a14824f61c8bd1bf89db34b3ccef1605fce029",
+      "bytes": 1188
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/hooks.test.ts",
+      "sha256": "2e8c69bd2460454dcf883db77fc699649449385b998e48d2dff6a2f7a85c05d7",
+      "bytes": 13959
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/identifier-complexity.test.ts",
+      "sha256": "345b77751b6f80c98f938813fa28352a1e910978254f72eedd4d273239d9892a",
+      "bytes": 5578
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/lang-agnostic-codes.test.ts",
+      "sha256": "d96338b10f2077bd2b4cee66d7d193fa5fb79f66d3381ad8f17f57a15c7504dd",
+      "bytes": 2397
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/lang-temperature.test.ts",
+      "sha256": "4693da2eb07355a93a088ff37ab36248fa24e2ffe8f1f173625ac48e252cda10",
+      "bytes": 5972
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/lang.test.ts",
+      "sha256": "ac579dd2ee7a2e13ace713e0b54166cb0b6ac462a792b4dffd02f6df909796dd",
+      "bytes": 5805
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/maxlen.test.ts",
+      "sha256": "7e15b87a0d744257770b3c32a10a34373dec30b375bc967083b1c4371083d4c5",
+      "bytes": 417
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/package-e2e.mjs",
+      "sha256": "c63662e57e04b1a116c849f3d6f8d8c88e954d4c5555a096f514c6f6894cd4ce",
+      "bytes": 5709
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/parity-sequence.test.ts",
+      "sha256": "fb7c6dc636fbdfdabf4898c17f2368475c215117bb0c2964d06778e759f50e64",
+      "bytes": 7044
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/revision-pinning.test.ts",
+      "sha256": "1e6e16f8fd71c538189dc1629190b3dee47dd9972ead84dc755494c4ece1987a",
+      "bytes": 7642
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/router.test.ts",
+      "sha256": "2d01067d51c751f26107cc1ef27143c57c2d4ef5fa14f5572dd68880af9ef6d7",
+      "bytes": 2346
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/scaffold.test.ts",
+      "sha256": "41f493cfcde48e7990d16f01df5b4e86a45723c1c62471b5f578240e72f31bd7",
+      "bytes": 190
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/sequence-prefix.test.ts",
+      "sha256": "163186458acb244dd3e4c9d2bf2694910ef7069b52642cbbc9b9db22624c30d7",
+      "bytes": 4177
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/shortlist.test.ts",
+      "sha256": "7164fc473525e7403fa9143afd625421a815118040ae4ea70db203eb193bbde2",
+      "bytes": 792
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/structured.test.ts",
+      "sha256": "b76b4090234f6ef0c447af25cafb8c03710857b21b57db4090a9e6b789be794c",
+      "bytes": 10468
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tests/tokenizer-parity.test.ts",
+      "sha256": "10e17a46a4079e059e297a9aa19fe3583ac92cd207262d7f49e5ddb2dd73240b",
+      "bytes": 3830
+    },
+    {
+      "path": "exp/vendor/laya/laya-ts/tsconfig.json",
+      "sha256": "dd09a20ec23fb032c8e457edc85b401799080c6fadef6b9b765aa68c6d91ba14",
+      "bytes": 227
+    },
+    {
+      "path": "exp/vendor/laya/laya/__init__.py",
+      "sha256": "25fd3fc8900785fd8d4b20b2642ef13c76afea36a840ef8a0103d6e108f0736c",
+      "bytes": 3221
+    },
+    {
+      "path": "exp/vendor/laya/laya/agent.py",
+      "sha256": "1473ffd335a1becf55bf7aadde6d31f9d6be27862f5deaa5f4ebd3451fa154e3",
+      "bytes": 62030
+    },
+    {
+      "path": "exp/vendor/laya/laya/cli.py",
+      "sha256": "e73e51da8f4f6fdc9ff8570f664b41bd2d656e0e2f91bb46c4d51bc2366972d6",
+      "bytes": 6736
+    },
+    {
+      "path": "exp/vendor/laya/laya/common.py",
+      "sha256": "4ab41be6a4d9fdbad74eccf4f64c43e2c7404d227988d97ed8233ded8b182cb1",
+      "bytes": 20557
+    },
+    {
+      "path": "exp/vendor/laya/laya/email.py",
+      "sha256": "17d147718e6111b6f702436978137006a6e46f13bd78eed8b8d90dad38ae4650",
+      "bytes": 11300
+    },
+    {
+      "path": "exp/vendor/laya/laya/evals.py",
+      "sha256": "da66a10c64fcf45540cada1646a020db83cde885652477b65e6d65311b9b13c2",
+      "bytes": 16239
+    },
+    {
+      "path": "exp/vendor/laya/laya/evals_cli.py",
+      "sha256": "a2d7f3454b3f87f2c7b01d7e9066978980e74e2b37ef5d2e82a81030bb58c15f",
+      "bytes": 8604
+    },
+    {
+      "path": "exp/vendor/laya/laya/fast.py",
+      "sha256": "6339b285bdf76c862402e8a6ce72310d77a6d413fe819d6ecbd5ed665f990b2b",
+      "bytes": 12575
+    },
+    {
+      "path": "exp/vendor/laya/laya/hooks.py",
+      "sha256": "83a53463c360f2209d49c906aad813b5de6c6fae763dd75d0fce39a69198fbd7",
+      "bytes": 18120
+    },
+    {
+      "path": "exp/vendor/laya/laya/integrations/__init__.py",
+      "sha256": "43cc61d5c791f371e319a1874473f5e726fc204ff721ae1d94aa745220c93f4c",
+      "bytes": 301
+    },
+    {
+      "path": "exp/vendor/laya/laya/integrations/langchain.py",
+      "sha256": "b3f7267f3b7b1e6b2afa89c69f57959e80d8c424792d02d5d9295d728e647ee3",
+      "bytes": 18619
+    },
+    {
+      "path": "exp/vendor/laya/laya/lang.py",
+      "sha256": "d6a234ee866c5f05ff622e70e78b48a5dc05c792058fb276535683573fac70b0",
+      "bytes": 35926
+    },
+    {
+      "path": "exp/vendor/laya/laya/mcp/__init__.py",
+      "sha256": "3cddfbdb68ea7e25aaa46df3fd732a939d24b07ea2fbfbde2ba92a99af4b43d2",
+      "bytes": 422
+    },
+    {
+      "path": "exp/vendor/laya/laya/mcp/device.py",
+      "sha256": "eb3899a41696bc5548234e76e1fc15ef1125c657cfe227ecc9b6bdbd48d0b6b8",
+      "bytes": 3976
+    },
+    {
+      "path": "exp/vendor/laya/laya/mcp/server.py",
+      "sha256": "87f8aa0671096b0bb4a51c2dc49b2db6356e46e39a2e0fe9c4227d7f3105fe5c",
+      "bytes": 9852
+    },
+    {
+      "path": "exp/vendor/laya/laya/mcp/tools.py",
+      "sha256": "224a5b4cb8f19649eb8c46f0800e6e4fdd42fa33911b22210da31bc1c96abe86",
+      "bytes": 14110
+    },
+    {
+      "path": "exp/vendor/laya/laya/onnx_agent.py",
+      "sha256": "1d5534ab5931dfd08e6aa59ca694d928973dc1fc760d1c1ef0880547e10a35aa",
+      "bytes": 19174
+    },
+    {
+      "path": "exp/vendor/laya/laya/presets.py",
+      "sha256": "2a3370f587cae29696bfa487edcc51caf47a211518733fdb192cf6d4eddbf1ea",
+      "bytes": 7203
+    },
+    {
+      "path": "exp/vendor/laya/laya/revisions.py",
+      "sha256": "2b9e64700b7ff11185fc1f1ee82bf14f35a3c874f4e1134fc8ae792519353fdc",
+      "bytes": 4058
+    },
+    {
+      "path": "exp/vendor/laya/laya/router.py",
+      "sha256": "3e4a65b33f2d36076ac522945470d9ec10cfff97eb389b6ba1ad5f482ce8e079",
+      "bytes": 45601
+    },
+    {
+      "path": "exp/vendor/laya/laya/serve.py",
+      "sha256": "72abe8b73480c9a9738946dfe9898e5240e8fb9d82d3d9054c267cc61c9829f6",
+      "bytes": 18486
+    },
+    {
+      "path": "exp/vendor/laya/laya/shortlist.py",
+      "sha256": "3bf5397671b658602efd9071bea5c6e6e4ff2282a9b1d66487a5c0a018ad1ea1",
+      "bytes": 14510
+    },
+    {
+      "path": "exp/vendor/laya/laya/structured.py",
+      "sha256": "d8aa56d4832eaf7804767b0194f7f50c139d4f261171079f60b27f4fc9cbbf8d",
+      "bytes": 12021
+    },
+    {
+      "path": "exp/vendor/laya/laya/tl_kernels.py",
+      "sha256": "6d7897abce718499c93325144200999e153a3603f0ce83dd88e1065cf074f20a",
+      "bytes": 10654
+    },
+    {
+      "path": "exp/vendor/laya/nix/laya-serve.nix",
+      "sha256": "a652cf7b2145cd1c5d86a7973876380bebeef59ad1ee700b38267618ceacd280",
+      "bytes": 6251
+    },
+    {
+      "path": "exp/vendor/laya/nix/package.nix",
+      "sha256": "e9a49984ae6c86a89315cd7a75405be4a4e909af9454939814a075c21dd26adf",
+      "bytes": 1183
+    },
+    {
+      "path": "exp/vendor/laya/pyproject.toml",
+      "sha256": "95b594bc7e55ac82e0065de599d028101174a5ebe6400046e20bae517875ca27",
+      "bytes": 2401
+    },
+    {
+      "path": "exp/vendor/laya/requirements-docs.txt",
+      "sha256": "e6fd2baa907dedaf20708c9fe1fe0fe0d80d4137426c8d031cd36c26419673cb",
+      "bytes": 210
+    },
+    {
+      "path": "exp/vendor/laya/research/README.md",
+      "sha256": "dfde8c916e46b15e225cd7cc39077b88172349b1a56b856a9cb11cb9a049beb7",
+      "bytes": 8368
+    },
+    {
+      "path": "exp/vendor/laya/research/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/feishu_zh/LICENSE",
+      "sha256": "fdf440e5214588d9edcdc1ec315cddbd8525fe509242c24989a8472d283325f4",
+      "bytes": 1069
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/feishu_zh/README.md",
+      "sha256": "35b31969dd22280266f2102b37e22351f7589851c88fb27f82ebb2cb2b4a3910",
+      "bytes": 7641
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/feishu_zh/README.zh-CN.md",
+      "sha256": "bee39e97afc165cf8877f8a8cf601bdbf0b61611e85510337062bbc0246202a6",
+      "bytes": 3170
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/feishu_zh/SOURCE.json",
+      "sha256": "08e87111674e91b66390d266f79ee00aaea2ce613a2b320619ad7e685ea0d3be",
+      "bytes": 1554
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/feishu_zh/assets/xiaohongshu-scorecard-3x4-en.png",
+      "sha256": "8e6b8871ce5d6e1acd4ef15ea451788312c3be2999e021400a714b74cb3d648b",
+      "bytes": 262304
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/feishu_zh/assets/xiaohongshu-scorecard-3x4.png",
+      "sha256": "6df3fd501463355ee080ff9b024288d393047b52c5910ae9ce6a361acbf9a803",
+      "bytes": 347711
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/feishu_zh/assets/xiaohongshu-table-3x4.png",
+      "sha256": "1872cd09fe7ebd9d38e688a0d3848582ba61c1624cc47f1ce00274b4aa56045e",
+      "bytes": 393320
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/feishu_zh/audit.py",
+      "sha256": "c4eb6b81019327cd0ad88a97c1184d9fb9744180ddcb0f0f961ae9e4a5f4d54d",
+      "bytes": 4909
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/feishu_zh/metrics.py",
+      "sha256": "1f9bb7a6a7170b169a779d748e0debada938fd90942d5458487a31b795c24ac0",
+      "bytes": 3680
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/feishu_zh/prompts.py",
+      "sha256": "e7bb752c1907015f96e81b27793eeacb6832aaab8f21722aa2318ad0bfa5a3c4",
+      "bytes": 3392
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/feishu_zh/render_cards.py",
+      "sha256": "3a4ae69fc47270574645483dcf28941e9939d3ad2b507e3aa87a370bfbb5f5a0",
+      "bytes": 8468
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/feishu_zh/run.py",
+      "sha256": "0809319bfd63279eb07881ccc8ca6a411483f2427a5c74460ba4687bd7eb0ed6",
+      "bytes": 9138
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/feishu_zh/tests/test_audit.py",
+      "sha256": "bb3713cc504a8a3904ec084002aa9d1123ae09538552847ab87600d5ea1cb906",
+      "bytes": 3687
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/zh_short_commands/README.md",
+      "sha256": "0c897dd52f77a80f61360972af4ca01275b92aaa0a33d2a7b9e6ebda5d07d21c",
+      "bytes": 12605
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/zh_short_commands/README.zh-CN.md",
+      "sha256": "a5ad3dcd82f99f00d7135351a3082da1f15e894e5cde003c8276b05e494bf059",
+      "bytes": 11933
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/zh_short_commands/audit.py",
+      "sha256": "156082467a127af2947bc813ce63e626cb9756ead5d84fee01f80eab9fff5897",
+      "bytes": 15000
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/zh_short_commands/prompts.py",
+      "sha256": "d26c8357a302f887258382c5a40d1c1320adab8b3e86c364ef150a913a06686d",
+      "bytes": 5824
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/zh_short_commands/run.py",
+      "sha256": "ca421d2f111fa53ba8ba0ee0545485e9e572be941840a5546bf28f646ccddf4b",
+      "bytes": 12514
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/zh_short_commands/tests/test_audit.py",
+      "sha256": "34fa211491a48e6486b7b935352537ae9e4ceb4ebb39694d06f0112ca06c3ed8",
+      "bytes": 14250
+    },
+    {
+      "path": "exp/vendor/laya/research/benchmarks/zh_short_commands/tests/test_benchmark.py",
+      "sha256": "f7a5a54bd0db9fe8ecefda7a6353474b0c0b9d9a754d7fc9669a3cf5ecb7d352",
+      "bytes": 12146
+    },
+    {
+      "path": "exp/vendor/laya/research/eval/README.md",
+      "sha256": "c7ec7ec417cb12eaa7fdb0bab6301ef4f5a7d3bd658335214c9505888b7d494d",
+      "bytes": 21230
+    },
+    {
+      "path": "exp/vendor/laya/research/eval/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "exp/vendor/laya/research/eval/laya_eval.py",
+      "sha256": "f5783fc560b6ad650819c49102b954637fcf4c0f1214373b0306a6ce81700acc",
+      "bytes": 16085
+    },
+    {
+      "path": "exp/vendor/laya/research/eval/metamorphic.py",
+      "sha256": "32658315d31f3047c64bfd768a96bb53fffbd0c316aa3e511f37e81f8153fd80",
+      "bytes": 15585
+    },
+    {
+      "path": "exp/vendor/laya/research/eval/presentation_checks.py",
+      "sha256": "cade6e5d6e987de22fd2e17425693a6c2832eb51d8e233a56ebea102bcd62ca9",
+      "bytes": 12380
+    },
+    {
+      "path": "exp/vendor/laya/research/eval/test_laya_eval.py",
+      "sha256": "d206e86129965405d0238d9e9373c40b538918376a7d97c4a61c10a1d3783b7b",
+      "bytes": 11443
+    },
+    {
+      "path": "exp/vendor/laya/research/eval/test_metamorphic.py",
+      "sha256": "bdcd1fa046143ea85036006514e760769408c421082e5e703d841cbedba7d9c0",
+      "bytes": 10440
+    },
+    {
+      "path": "exp/vendor/laya/research/eval/test_presentation_checks.py",
+      "sha256": "68599c55bd56b1d869f6a2aa8162c1e6879fc98533d4cdf713729ef1c5d90151",
+      "bytes": 7546
+    },
+    {
+      "path": "exp/vendor/laya/research/evals/README.md",
+      "sha256": "9ba03304fade0f327bece2e4a00d3e2ed8d701724c03fca94988f2d0210d49ac",
+      "bytes": 2290
+    },
+    {
+      "path": "exp/vendor/laya/research/evals/check_regression.py",
+      "sha256": "a69a5e4bfb9aa5fc089f61f2568cd3d86ef4aa19ebfbe3ecbbb49286a05aa210",
+      "bytes": 2809
+    },
+    {
+      "path": "exp/vendor/laya/research/evals/thresholds.json",
+      "sha256": "ffd38ebd9f5e1e8d5b44891ee3a97a31232347391e4c54619cc9bfe818ddf72f",
+      "bytes": 330
+    },
+    {
+      "path": "exp/vendor/laya/research/scripts/bench_apps.py",
+      "sha256": "d747037d657a738e7b9d447dbf6fa8e7a08863c390a8f8fce45be1af0ca81a3f",
+      "bytes": 15647
+    },
+    {
+      "path": "exp/vendor/laya/research/scripts/bench_latency.py",
+      "sha256": "bc4294a65b69864734bbcfdcc84b672ec0076c8f571f0bf18c6c81a631e59486",
+      "bytes": 8082
+    },
+    {
+      "path": "exp/vendor/laya/research/scripts/bench_length_batching.py",
+      "sha256": "a29fa2db7742566ba1c00d5f0743b2f78727430d2ccb0b841525b1443ea098cb",
+      "bytes": 10382
+    },
+    {
+      "path": "exp/vendor/laya/research/scripts/bench_local.py",
+      "sha256": "da24c77457de4c940e7bde6be7f6d8474dbe2fcacc58057050f313181d4ef905",
+      "bytes": 15608
+    },
+    {
+      "path": "exp/vendor/laya/research/scripts/bench_long_context.py",
+      "sha256": "1867b70d672f2af871989c2ea4c1e4d1beb967518679c002a9fb4b063688a79f",
+      "bytes": 6311
+    },
+    {
+      "path": "exp/vendor/laya/research/scripts/bench_router_grouping.py",
+      "sha256": "07f01d491f7bee7179f8c6587d4c3987c2cfd76eb7ff9625177cfc1553c2984d",
+      "bytes": 3202
+    },
+    {
+      "path": "exp/vendor/laya/research/scripts/build_benchmark_nb.py",
+      "sha256": "e74e31922c20f18ae90e2a90463ada4394f139e8667accfacd1c5d47b3f38fad",
+      "bytes": 38752
+    },
+    {
+      "path": "exp/vendor/laya/research/scripts/confidence_definitions.py",
+      "sha256": "f534c3e3be61f6170a19e9690b61b3deae044fc5b4a718da3e07b4f74ecef758",
+      "bytes": 12576
+    },
+    {
+      "path": "exp/vendor/laya/research/scripts/make_plots.py",
+      "sha256": "802e503e3b4825398ae4055d1d5d422b9670916545c2c8975cb7546d21c3263c",
+      "bytes": 7904
+    },
+    {
+      "path": "exp/vendor/laya/research/scripts/plot_long_context.py",
+      "sha256": "8cb5b36c34ab165a16a33f4f20888b6480e6f52143c605992957fd3414cb50bb",
+      "bytes": 2248
+    },
+    {
+      "path": "exp/vendor/laya/scripts/export_onnx.py",
+      "sha256": "cd2f0fadc62b1b880724dd56615a22503d16907237aa30ba257276ccdf5057d0",
+      "bytes": 2814
+    },
+    {
+      "path": "exp/vendor/laya/setup.py",
+      "sha256": "f462066ed9db7ab9e9db6937b39225772bce1bd641acba0d06384b9ea639aa0b",
+      "bytes": 124
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_audit_regressions.py",
+      "sha256": "a8bd6818446c0240b812f31b1c80235dba4c58ea7a53aeedcafca3a7681ffef0",
+      "bytes": 8282
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_batch.py",
+      "sha256": "1fe06a4bea05073b8b8652553c67b325d4a9f01263b7ce2e6affb92547d24759",
+      "bytes": 12637
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_blank_lang_routing.py",
+      "sha256": "9a591b2ad95c3b1c7ce4a54b12d8d46b07cc6b65023230194f35ccf8cb959225",
+      "bytes": 4497
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_calibration_persistence.py",
+      "sha256": "3ba1eb77a860b011ceb4b116e5ce9fa69f96c9d5d42bd940dc6a37e8bc0e5722",
+      "bytes": 8065
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_cli.py",
+      "sha256": "884da35da30c07b8a3b5559b722e05b3f09fdbacb09eaa542226e57ac38f144e",
+      "bytes": 7095
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_confidence.py",
+      "sha256": "272bbc9bc3a7b41f2c299e1a6776c7caf4245cd85cfcd7e9472cddeb2e08b8fe",
+      "bytes": 5837
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_context_manager.py",
+      "sha256": "d5a528f03aedcaf7cbd0afe8877dd74a7bba6bc1c2e1c2da8106254ab1257130",
+      "bytes": 578
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_criteria.py",
+      "sha256": "52b01e4b593e0321f8bea8bd7f1ddd8745069c8de92c6d1bd15b5f658343f17d",
+      "bytes": 27602
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_criteria_normalization.py",
+      "sha256": "5b0c9cded01bcfb876710fb2f2ca229e247a6c8170c0258389fe89688ab1bda4",
+      "bytes": 1143
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_decision_model.py",
+      "sha256": "0af6782e68d40109fc73c90ea36d69f7fe0f2ed268893c680259930e0644c185",
+      "bytes": 3921
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_doc_tables.py",
+      "sha256": "bdda5615a6f25f489cc2af35f8065a5288c07726b30354aab3b21ce1256cea29",
+      "bytes": 10423
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_docker_entrypoint.py",
+      "sha256": "c89dabafc89dfa75c56956c79c1d91db2238a3ab9d6d9bc3a65a349b6362a99f",
+      "bytes": 3016
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_docker_torch.py",
+      "sha256": "e546a667c698784ebed1819eecf055d8c5490fb82f62cbefc5cd661a48215316",
+      "bytes": 3641
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_download.py",
+      "sha256": "1bd17217152fe90cec02c932da2906a86ba8bdc29a3a3c20929b203200f18c31",
+      "bytes": 7191
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_email.py",
+      "sha256": "e4eec7ea603c7d252dd88eac401f45c4cd2c9c3f430283daa3025c579051213b",
+      "bytes": 22667
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_empty_questions.py",
+      "sha256": "9b7d219d3a4ae1d39f5d3f0d421d525dc385440f7395606ed162dcf65de58025",
+      "bytes": 5218
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_evals.py",
+      "sha256": "c86936a4f780371d65a82b6a902c8150a0165c61ca37b456785d5b641792794b",
+      "bytes": 9468
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_evals_api.py",
+      "sha256": "50c41f71dbd5b5065e41bbc14d82eb1cc0515b9ab2a975296f4145aaa341512a",
+      "bytes": 2203
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_example_server_limits.py",
+      "sha256": "e78d59b32fb189ff8aea956d34efb9cc631de0792503cb29a4cea0d6eebcc67a",
+      "bytes": 7221
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_export_onnx_safety.py",
+      "sha256": "9374a77f86abda2dfaefc2d7963e23261060a5cb1bd0d270d053c8dcc235676b",
+      "bytes": 943
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_fast.py",
+      "sha256": "464007512eb1b6136e28a2a6642afdad0279d38f53f00cbedceb797a8833fbd0",
+      "bytes": 5301
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_head_checkpointing.py",
+      "sha256": "21da87025e3b7aec65bc944a4f46a8c59bf0507eb5d9a8d6aebad28cdb3d3515",
+      "bytes": 6563
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_hooks.py",
+      "sha256": "8ec502ef338edbe5e90d56d37d3ca41bfc78b41a57dd82ea99cc0f48c9640cfa",
+      "bytes": 41301
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_hooks_api.py",
+      "sha256": "c20ad6c742432b2c36fd559ae0d4df2cf8e1109b1e02957e45b846dea4fb028d",
+      "bytes": 7476
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_identifier_complexity.py",
+      "sha256": "267e5928a7c986001ba9e1058550f8c57f4867ee2115f041a961d65715c1275c",
+      "bytes": 6878
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_lang_guess.py",
+      "sha256": "5a2e7bb3db8d33b2ed0bd318a4e0c84ba1b259b284a7d9a89748c4812783dc61",
+      "bytes": 8880
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_lang_stats.py",
+      "sha256": "c4f6441c5445a614f73b83de3f4cfb5ba649c38986e5334925a9d57b295629ac",
+      "bytes": 3630
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_langchain.py",
+      "sha256": "7418272bc54a41a482c6fc476e8feb12401f0b21bbcd281c26304dcc481d7190",
+      "bytes": 9708
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_lazy_import.py",
+      "sha256": "7f9d2ce3c2fb320b991b96dcd2eec951cb6054606ba04f7dc5d6a56423d9bb64",
+      "bytes": 2534
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_load_errors.py",
+      "sha256": "199c0ba867d5fa831d80f059a2380752542c143801171f5965791e3870ea0191",
+      "bytes": 8331
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_local_e2e.py",
+      "sha256": "8e77a43b0c6709603c1dd9b8bdb8889e56646780bcd266ddc596be54ccbe6f49",
+      "bytes": 18375
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_mcp.py",
+      "sha256": "990785f5d756663dc6745df56f1030e9e3a670674088ef8dae0ea42745c692f4",
+      "bytes": 26082
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_mcp_local_e2e.py",
+      "sha256": "65c779df012aa884677221df871cc9ebd772334d84f01a058298204adda1195e",
+      "bytes": 13265
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_onnx.py",
+      "sha256": "02b0aaae02e5cc70c68f878151ce5205dc21828fbe94eb7127f7e2233b1795dc",
+      "bytes": 3478
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_onnx_lang_parity.py",
+      "sha256": "32cb608cf561fba616add36d25b56fe6235dcd9f77c87c7e0d708f32a3638f0a",
+      "bytes": 5851
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_packaging.py",
+      "sha256": "590d71422ad5d74756e1fdd2c1570c648538808726e90d30dc6470199587b3e5",
+      "bytes": 11793
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_portability.py",
+      "sha256": "c4fd689b27b51cb472572039db390fe20abee8179d97b629e796ceb8dc2f3f3a",
+      "bytes": 12757
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_predict_batch.py",
+      "sha256": "09908bc82047836e0b182463e9e25dc764ab89a994f5792826e8ded50b0f19a0",
+      "bytes": 8821
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_predict_long.py",
+      "sha256": "a6cdd9a3d30dc145ef17127f04105ff7f95f1f23badb0eea62c6a80b15359c53",
+      "bytes": 4855
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_revision_pinning.py",
+      "sha256": "98ec9bff7acfd4eaf4ce668e4c214d158e90a7806229528dd364eba081996682",
+      "bytes": 6949
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_router.py",
+      "sha256": "1713545ee68c5e98bace653858fcb16368a8073140ccd14762cf21acd17aef4a",
+      "bytes": 62911
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_router_batch.py",
+      "sha256": "bf0ebab334b89f48fd683ed72b0f44c6fe6c4b77e65b27ee742cc59a30fadd6e",
+      "bytes": 12672
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_router_memory.py",
+      "sha256": "0c6cb809d1fd05dc89114e50f21a7769a010a8bf17b968fad30d792628625c72",
+      "bytes": 713
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_runtime_fixes.py",
+      "sha256": "485492d3be2eb27b309d98f8e0c84ca01556b288be0137a892b5a29e5aadbcc6",
+      "bytes": 10026
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_serve.py",
+      "sha256": "3facd2e7f0d2fbd9e0e7366e70403c5f6c9b76913a75d0874166d1a65934251a",
+      "bytes": 22219
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_server_example.py",
+      "sha256": "3110b306cf6920f3423289d44e13db1baade79aa8764afeda776e26b50d5ca87",
+      "bytes": 13614
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_shortlist.py",
+      "sha256": "a58b52e67cadbd46e8e9abdd568695c54b638b169abb1da07287859b51f3fef2",
+      "bytes": 29425
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_shortlist_cosine.py",
+      "sha256": "7318ad19a4c5710570105dd8031830ff392d83dba7469e6b493b593a42ad68b3",
+      "bytes": 901
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_structured.py",
+      "sha256": "2fff3d704f91a6c99759530ffafeefbdcc9d3005ff1827bbdd67d09b4d74386f",
+      "bytes": 11297
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_structured_api.py",
+      "sha256": "7d3525f7db3b2dad64f369e62d9b8f2991fbc050fcd6fb1ed3be17cfdc1a7245",
+      "bytes": 4595
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_system_one_lang.py",
+      "sha256": "1f7f6680982472e62a2a5b0e183aafe507ca5da5fd6c21f3201e401d9b6592f8",
+      "bytes": 1213
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_temperature_loading.py",
+      "sha256": "03bc49cb4b635ec10eca639af8e485c02dabca781132d44734c6a6d09c3b815c",
+      "bytes": 8325
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_tokenizer_cache.py",
+      "sha256": "520ab91ec9129552adcd2a28d81af67c657a6f05e8b5886e9b893fd09e4017a2",
+      "bytes": 3909
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_tokenizer_concurrency.py",
+      "sha256": "ba4fc0563c2d16bbc04909ed697ba98bd30e4379d5b9255832ff4f63c4bbd7b8",
+      "bytes": 2684
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_training.py",
+      "sha256": "b004e199c17740e41b1d8911dbf7a844ac7d70cd48b727b5db07ff0fa1d7308f",
+      "bytes": 15667
+    },
+    {
+      "path": "exp/vendor/laya/tests/test_truncation_direction.py",
+      "sha256": "00b64d76db2bcc0e7f872e31dd5345f8c1231458485be50b482f531eb25d0243",
+      "bytes": 5955
+    },
+    {
+      "path": "exp/vendor/laya/zensical.toml",
+      "sha256": "2622a81378d8016eefa1ee4ac8b47ea42c59bf9f051734dc51e471b0c7611c1c",
+      "bytes": 1917
+    },
+    {
+      "path": "exp/verify_prepared_acceptance.py",
+      "sha256": "cd88d90853fe8d51e62a928bf988833a1d50959b7f35fbfb78cf9cbedf038454",
+      "bytes": 3613
+    },
+    {
+      "path": "exp/warm_cache.sh",
+      "sha256": "90aff46c189b70fb6430150201afa0e3c229a379f619403029a03c71fa3766ef",
+      "bytes": 407
+    },
+    {
+      "path": "exp/watchdog_run.sh",
+      "sha256": "5938d3df9a9a136aebfa05625a89d2c8f00f37efcb1f2710a2a5a566b212cd51",
+      "bytes": 1812
+    }
+  ]
+}
