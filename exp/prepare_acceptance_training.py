@@ -8,8 +8,8 @@ import math
 from pathlib import Path
 import shutil
 import tempfile
-import unicodedata
 
+from core.candidate_validation import norm, source_key
 import laya_acceptance_common as C
 from core.comet_feedback import from_config, validated_scores, validate_epsilon
 from legacy_laya_v1.prepare_acceptance_training import QUARANTINE
@@ -19,14 +19,6 @@ FOLDS = ('train', 'development', 'temperature_calibration', 'decision_diagnostic
 
 def read_jsonl(path):
     return C.read_jsonl(path)
-
-
-def norm(text):
-    return ''.join(unicodedata.normalize('NFKC', text).casefold().split())
-
-
-def source_key(text):
-    return hashlib.sha256(norm(text).encode()).hexdigest()
 
 
 def pair_id(row):

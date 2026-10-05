@@ -1,4 +1,4 @@
-"""Current binary Laya pipeline: direct actions and independent delayed COMET memory admission.
+"""Formal single-candidate Laya pipeline: direct actions and independent delayed COMET memory admission.
 
 The historical filename remains an entry point; the old three-class experiment
 is explicitly preserved under legacy_laya_v1, with separate artifacts.
@@ -15,16 +15,22 @@ from core import resolve_model_config
 from core.bm25_fields import Experience
 from core.experience import load_experiences, save_experiences, render_experience_block
 from core.manifest import read_manifest
-from core.optimized_pipeline import INSTRUCTIONS
+from core.refinement_instructions import INSTRUCTIONS
 from core.comet_feedback import from_config, validate_epsilon, validated_scores
-from acceptance_data import valid_candidate
+from core.candidate_validation import valid_candidate, source_key
 import laya_acceptance_common as C
 from laya_relaxed_policy import choose_policy, select_candidate
-from prepare_acceptance_training import source_key
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / 'runs/laya_binary_flow_v1'
 TASK = 'wmt19_en_zh'
+FLOW_SCHEMA = 'laya-single-candidate-v1'
+FORMAL_ARMS = ('full_static', 'full_online')
+
+
+def require_single_candidate(value):
+    if type(value) is not int or value != 1:
+        raise ValueError('Formal flow requires candidates_per_round=1; use run_candidate_count_ablation.py for multiple candidates')
 
 
 def stable_seed(*parts):
@@ -97,7 +103,7 @@ class Verifier:
         self.diagnostic_temperature = diagnostic_temperature
         self.cache = {}
         self.scored = 0
-        empty = C.EncodedPairs([], self.tok)
+        empty = C.EncodedPairs([], self.tok, **({'template_version':self.cfg['input_template_version']} if 'input_template_version' in self.cfg else {}))
         self.overhead = max(len(p[0]) for p in empty.prefixes.values()) + 1
 
     def predict(self, rows):
@@ -112,14 +118,14 @@ class Verifier:
             if key in self.cache:
                 out[row['id']] = self.cache[key]
                 continue
-            length = len(self.tok(C.state_text(inputs).replace(self.tok.mask_token, ' '), add_special_tokens=False)['input_ids']) + self.overhead
+            length = len(self.tok(C.state_text(inputs, **({'template_version':self.cfg['input_template_version']} if 'input_template_version' in getattr(self,'cfg',{}) else {})).replace(self.tok.mask_token, ' '), add_special_tokens=False)['input_ids']) + self.overhead
             if length > 1024:
                 out[row['id']] = {'decision': 'Reject', 'status': 'context_overflow', 'probabilities': None}
                 continue
             pending.setdefault(key, {'row': {'id': key, 'input': inputs}, 'ids': []})['ids'].append(row['id'])
         if pending:
             items = list(pending.items())
-            encoded = C.EncodedPairs([v['row'] for _, v in items], self.tok)
+            encoded = C.EncodedPairs([v['row'] for _, v in items], self.tok, **({'template_version':self.cfg['input_template_version']} if 'input_template_version' in getattr(self,'cfg',{}) else {}))
             logits = C.infer(self.model, encoded, batch_size=16)
             classes = C.decisions(logits)
             probabilities = C.probabilities(logits, self.diagnostic_temperature)
@@ -178,7 +184,8 @@ def positive_memories(trace, reference, feedback, existing, epsilon_memory, audi
 class Flow:
     def __init__(self, protocol, generator, verifier, feedback, output, *, encoder=None, retriever_class=None):
         from core.hybrid_retrieval import LocalSentenceEncoder, HybridExperienceRetriever
-        self.p, self.gen, self.verifier, self.feedback = protocol, generator, verifier, feedback
+        require_single_candidate(protocol.get('candidates_per_round', 1))
+        self.p, self.gen, self.verifier, self.feedback = dict(protocol, candidates_per_round=1), generator, verifier, feedback
         self.output = Path(output)
         cfg = json.loads((self.output / 'retrieval.json').read_text())
         self.options = dict(cfg['retrieval'])
@@ -199,6 +206,9 @@ class Flow:
     def run(self, name, refs, drafts, online=False):
         from baseline_core.types import TaskExample
         from core.pipeline import build_refine_prompt
+        require_single_candidate(self.p['candidates_per_round'])
+        if name not in FORMAL_ARMS or online != (name == 'full_online'):
+            raise ValueError('Formal arms are full_static/full_online with matching memory mode')
         if len(refs) != len(drafts):
             raise ValueError('Draft/reference count mismatch')
         lib = load_experiences(self.output / 'initial_memory.jsonl')
@@ -229,35 +239,33 @@ class Flow:
                     rounds[i] = {'round': round_index, 'before': before, 'retrieved_ids': ret.exp_ids,
                                  'online_retrieved': sum(k.startswith('online-') for k in ret.exp_ids),
                                  'candidates': [], 'selected_slot': None, 'accepted': False, 'bank_size': len(lib)}
-                    requests.extend({'prompt': prompt, 'seed': stable_seed(tr['sample_id'], round_index, slot)}
-                                    for slot in range(self.p['candidates_per_round']))
+                    requests.append({'prompt': prompt, 'seed': stable_seed(tr['sample_id'], round_index, 0)})
                 generated = self.gen.generate(requests)
                 if len(generated) != len(requests):
                     raise ValueError('Candidate count mismatch')
                 score_rows = []
-                k = self.p['candidates_per_round']
-                for pos, i in enumerate(active):
+                for i, g in zip(active, generated):
                     rd = rounds[i]
-                    for slot, g in enumerate(generated[k * pos:k * (pos + 1)]):
-                        valid, why = valid_candidate(rd['before'], g)
-                        candidate = dict(g, slot=slot, valid=valid, validity_reason=why, changed=g['text'] != rd['before'],
-                                         id=f"{traces[i]['sample_id']}:{round_index}:{slot}", decision=None)
-                        if not candidate['changed']:
-                            candidate.update(decision='Reject', status='no_op',
-                                             decision_origin='deterministic_rule', probabilities=None)
-                        rd['candidates'].append(candidate)
-                        if name != 'unfiltered_static' and valid and candidate['changed']:
-                            score_rows.append({'id': candidate['id'], 'input': {'source': traces[i]['source'], 'current': rd['before'], 'candidate': g['text']}})
+                    valid, why = valid_candidate(rd['before'], g)
+                    candidate = dict(g, slot=0, valid=valid, validity_reason=why, changed=g['text'] != rd['before'],
+                                     id=f"{traces[i]['sample_id']}:{round_index}:0", decision=None)
+                    if not candidate['changed']:
+                        candidate.update(decision='Reject', status='no_op',
+                                         decision_origin='deterministic_rule', probabilities=None)
+                    # Retain the one-item list for trace/feedback schema compatibility.
+                    rd['candidates'] = [candidate]
+                    if valid and candidate['changed']:
+                        score_rows.append({'id': candidate['id'], 'input': {'source': traces[i]['source'], 'current': rd['before'], 'candidate': g['text']}})
                 scored = self.verifier.predict(score_rows) if score_rows else {}
                 next_active = []
                 for i in active:
                     rd = rounds[i]
-                    for candidate in rd['candidates']:
-                        if candidate['id'] in scored:
-                            candidate.update(scored[candidate['id']])
-                        elif name != 'unfiltered_static' and candidate['valid'] and candidate['changed']:
-                            raise ValueError('Missing verifier decision; do not silently accept')
-                    selected = select_candidate(rd['candidates'], self.p['policy'], 'unfiltered' if name == 'unfiltered_static' else 'laya')
+                    candidate = rd['candidates'][0]
+                    if candidate['id'] in scored:
+                        candidate.update(scored[candidate['id']])
+                    elif candidate['valid'] and candidate['changed']:
+                        raise ValueError('Missing verifier decision; do not silently accept')
+                    selected = select_candidate(rd['candidates'], self.p['policy'])
                     if selected is not None:
                         rd.update(selected_slot=selected, accepted=True)
                         traces[i]['final'] = rd['candidates'][selected]['text']
@@ -291,7 +299,11 @@ class Flow:
 
 
 def prepare(args, feedback):
+    require_single_candidate(getattr(args, 'candidates_per_round', 1))
+    if not args.arms or set(args.arms) - set(FORMAL_ARMS) or len(set(args.arms)) != len(args.arms):
+        raise ValueError('Formal entry point only supports unique full_static/full_online arms')
     cfg = json.loads(args.config.read_text())
+    require_single_candidate(cfg.get('candidates_per_round', 1))
     if cfg.get('decision_schema') != C.SCHEMA:
         raise ValueError('Expected current binary protocol config')
     epsilon_memory = validate_epsilon(cfg['epsilon_memory'], 'epsilon_memory')
@@ -319,11 +331,11 @@ def prepare(args, feedback):
     shutil.copy2(args.manifest, args.output / 'test_manifest.jsonl')
     shutil.copy2(args.initial_memory, args.output / 'initial_memory.jsonl')
     shutil.copy2(args.retrieval_config, args.output / 'retrieval.json')
-    protocol = {'version': C.SCHEMA, 'created_at_utc': datetime.now(timezone.utc).isoformat(),
+    protocol = {'version': C.SCHEMA, 'flow_schema': FLOW_SCHEMA, 'created_at_utc': datetime.now(timezone.utc).isoformat(),
                 'policy': policy, 'epsilon_memory': epsilon_memory, 'feedback': feedback.metadata,
                 'generator': 'qwen3-8b', 'generator_path': resolve_model_config('qwen3-8b').path,
                 'gpu': args.gpu, 'gpu_memory_utilization': .34, 'batch_size': 16,
-                'max_rounds': 3, 'candidates_per_round': 4, 'model_sha256': C.digest(args.checkpoint / 'model.safetensors'),
+                'max_rounds': 3, 'candidates_per_round': 1, 'model_sha256': C.digest(args.checkpoint / 'model.safetensors'),
                 'memory_admission': 'all valid changed candidates with delayed delta_COMET > epsilon_memory; independent of Accept/Reject',
                 'feedback_timing': 'after every task in the batch completes', 'arms': args.arms,
                 'input_hashes': {n: C.digest(args.output / n) for n in ['test_manifest.jsonl', 'initial_memory.jsonl', 'retrieval.json']}}
@@ -331,17 +343,23 @@ def prepare(args, feedback):
     return protocol, refs
 
 
-def main(argv=None):
+def parse_args(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--manifest', type=Path, required=True)
     p.add_argument('--initial-memory', type=Path, default=C.COLLECTION / 'initial_memory.jsonl')
     p.add_argument('--retrieval-config', type=Path, default=C.COLLECTION / 'retrieval.json')
-    p.add_argument('--checkpoint', type=Path, default=C.OUT / 'best')
+    p.add_argument('--checkpoint', type=Path, required=True, help='Explicit frozen binary checkpoint; no implicit early-model fallback')
     p.add_argument('--config', type=Path, default=ROOT / 'configs/laya_binary_v1.json')
     p.add_argument('--output', type=Path, default=OUT)
     p.add_argument('--gpu', default='0')
-    p.add_argument('--arms', nargs='+', choices=['full_static', 'full_online', 'unfiltered_static'], default=['full_static', 'full_online'])
-    args = p.parse_args(argv)
+    p.add_argument('--candidates-per-round', type=int, choices=[1], default=1,
+                   help='Formal protocol: exactly one candidate; multiple candidates require the separate ablation entry point')
+    p.add_argument('--arms', nargs='+', choices=FORMAL_ARMS, default=['full_static', 'full_online'])
+    return p.parse_args(argv)
+
+
+def main(argv=None):
+    args = parse_args(argv)
     if len(set(args.arms)) != len(args.arms):
         raise ValueError('Duplicate experiment arms')
     os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'

@@ -1,0 +1,15 @@
+{
+  "python": "/home/ymb/miniconda3/envs/qwen35/bin/python",
+  "host": "127.0.0.1",
+  "runtime_dir": "/mnt/huawei/ymb/aaai2027/exp/runs/vllm_services_20261004",
+  "dtype": "bfloat16",
+  "max_model_len": 4096,
+  "max_num_seqs": 32,
+  "models": [
+    {"name": "glm4-9b", "gpu": "0", "port": 8000, "path": "/home/ymb/glm_local/model", "gpu_memory_utilization": 0.40, "load_strategy": "lazy"},
+    {"name": "qwen3-8b", "gpu": "1", "port": 8001, "path": "/mnt/huawei/wwq/model/Qwen3-8B/model", "gpu_memory_utilization": 0.35, "load_strategy": "eager"},
+    {"name": "qwen3-32b", "gpu": "2", "port": 8002, "path": "/mnt/huawei/wwq/model/Qwen3-32B/model", "gpu_memory_utilization": 0.86, "load_strategy": "eager"},
+    {"name": "llama3.1-8b", "gpu": "3", "port": 8003, "path": "/mnt/huawei/wwq/model/llama3.1/model", "gpu_memory_utilization": 0.35, "load_strategy": "eager"},
+    {"name": "qwen3-4b", "gpu": "3", "port": 8004, "path": "/mnt/huawei/wwq/model/Qwen3-4B/model", "gpu_memory_utilization": 0.25, "load_strategy": "eager", "start_after": "llama3.1-8b"}
+  ]
+}

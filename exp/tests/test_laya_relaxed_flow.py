@@ -7,7 +7,7 @@ from types import SimpleNamespace
 import tempfile
 import unittest
 from laya_relaxed_policy import select_candidate
-from laya_relaxed_flow import positive_memories, Flow, Verifier
+from laya_relaxed_flow import positive_memories, Flow, Verifier, parse_args, prepare
 import laya_acceptance_common as C
 from core.experience import save_experiences
 
@@ -26,9 +26,12 @@ class RelaxedFlowTests(unittest.TestCase):
         candidates = [{'valid': True, 'changed': True, 'decision': 'Reject', 'probabilities': {'Accept': .99}},
                       {'valid': True, 'changed': True, 'decision': 'Accept', 'probabilities': {'Accept': .01}},
                       {'valid': True, 'changed': True, 'decision': 'Accept', 'probabilities': {'Accept': 1.}}]
-        self.assertEqual(select_candidate(candidates), 1)
+        self.assertIsNone(select_candidate([candidates[0]]))
+        self.assertEqual(select_candidate([candidates[1]]), 0)
         with self.assertRaises(ValueError):
-            select_candidate(candidates, {'p_better': .275})
+            select_candidate(candidates)
+        with self.assertRaises(ValueError):
+            select_candidate([candidates[1]], {'p_better': .275})
         self.assertIsNone(select_candidate([dict(candidates[1], valid=False)]))
         self.assertIsNone(select_candidate([dict(candidates[1], changed=False)]))
         with self.assertRaises(ValueError):
@@ -83,28 +86,54 @@ class RelaxedFlowTests(unittest.TestCase):
         self.assertNotIn('SECRET_REFERENCE', str([e.to_dict() for e in result]))
         self.assertFalse(positive_memories(trace, 'SECRET_REFERENCE', Feedback(), existing, 0))
 
+    def test_formal_entry_rejects_multicandidate_bypass_and_missing_checkpoint(self):
+        import contextlib
+        import io
+        base = ['--manifest', 'manifest.jsonl', '--checkpoint', 'epoch_20']
+        self.assertEqual(parse_args(base).candidates_per_round, 1)
+        for extra in (['--candidates-per-round', '4'], ['--arms', 'unfiltered_static']):
+            with self.subTest(extra=extra), contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+                parse_args(base + extra)
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+            parse_args(['--manifest', 'manifest.jsonl'])
+        for value in (4, 0, True, 1.0):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                Flow({'candidates_per_round': value}, None, None, None, 'unused')
+        f = Flow.__new__(Flow)
+        f.p = {'candidates_per_round': 1}
+        for name, online in [('unfiltered_static', False), ('full_online', False), ('full_static', True)]:
+            with self.subTest(name=name, online=online), self.assertRaises(ValueError):
+                f.run(name, [], [], online=online)
+        # Config-level multi-candidate injection is rejected before models/data/GPU.
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = Path(tmp) / 'cfg.json'
+            cfg.write_text(json.dumps({'candidates_per_round': 4}))
+            with self.assertRaises(ValueError):
+                prepare(SimpleNamespace(config=cfg, arms=['full_static'], candidates_per_round=1), None)
+
     def test_full_flow_delays_feedback_and_only_online_changes_memory(self):
         events = []
         class Generator:
             adapter = object()
             client = SimpleNamespace(count_tokens=lambda text: len(text))
             def generate(self, requests):
-                events.append('generate')
-                return [{'text': text, 'finish_reason': 'stop'} for text in ['好修改', '坏修改', '初稿', '']]
+                events.append(('generate', [r['prompt'] for r in requests]))
+                choices = {'source0|初稿': '好修改', 'source1|初稿': '坏修改',
+                           'source1|坏修改': '坏修改', 'source2|初稿': '持平改写'}
+                return [{'text': choices[r['prompt']], 'finish_reason': 'stop'} for r in requests]
         class Verifier:
             def predict(self, rows):
-                events.append('classify')
+                events.append(('classify', [r['id'] for r in rows]))
                 for r in rows:
                     assert set(r['input']) == {'source', 'current', 'candidate'}
                     assert r['input']['current'] != r['input']['candidate']
                     assert 'SECRET' not in str(r)
                 return {r['id']: {
-                    'decision': 'Accept' if r['input']['source'] == 'source1' and r['input']['current'] == '初稿' and r['input']['candidate'] == '坏修改' else 'Reject',
+                    'decision': 'Accept' if r['input']['source'] == 'source1' else 'Reject',
                     'probabilities': {'Accept': .9, 'Reject': .1}} for r in rows}
         class DelayedFeedback(Feedback):
             def score_pairs(self, pairs):
-                assert events[-1] == 'classify'
-                events.append('feedback')
+                events.append(('feedback', [r['source'] for r in pairs]))
                 return super().score_pairs(pairs)
         class Retriever:
             def __init__(self, library, encoder, **opts):
@@ -112,34 +141,39 @@ class RelaxedFlowTests(unittest.TestCase):
             def retrieve(self, source, before, **kwargs):
                 return SimpleNamespace(exp_ids=[e.exp_id for e in self.library if e.source_input != source])
             def rebuild(self, library):
-                events.append('rebuild')
+                events.append(('rebuild', len(library)))
                 return Retriever(library, None)
-        protocol = {'batch_size': 1, 'max_rounds': 3, 'candidates_per_round': 4, 'epsilon_memory': 0, 'policy': {}}
-        refs = [SimpleNamespace(sample_id=str(i), source='source' + str(i), reference='SECRET' + str(i)) for i in range(2)]
+        protocol = {'batch_size': 2, 'max_rounds': 3, 'candidates_per_round': 1, 'epsilon_memory': 0, 'policy': {}}
+        refs = [SimpleNamespace(sample_id=str(i), source='source' + str(i), reference='SECRET' + str(i)) for i in range(3)]
         drafts = [{'text': '初稿', 'finish_reason': 'stop'} for _ in refs]
         with tempfile.TemporaryDirectory() as temp:
             out = Path(temp)
             save_experiences([], out / 'initial_memory.jsonl')
             (out / 'retrieval.json').write_text(json.dumps({'encoder': 'unused', 'retrieval': {}}))
             flow = Flow(protocol, Generator(), Verifier(), DelayedFeedback(), out, encoder=object(), retriever_class=Retriever)
-            static = flow.run('full_static', refs, drafts)
-            online = flow.run('full_online', refs, drafts, online=True)
-            self.assertEqual([r['final'] for r in online], ['初稿', '坏修改'])
+            with patch('core.pipeline.build_refine_prompt', side_effect=lambda adapter, ex, before, *a, **kw: ex.source + '|' + before):
+                static = flow.run('full_static', refs, drafts)
+                static_events = list(events)
+                online = flow.run('full_online', refs, drafts, online=True)
+            self.assertEqual([r['final'] for r in online], ['初稿', '坏修改', '初稿'])
             for records in [static, online]:
-                no_ops = [c for tr in records for rd in tr['rounds'] for c in rd['candidates'] if not c['changed']]
-                self.assertTrue(no_ops)
-                for candidate in no_ops:
-                    self.assertEqual(candidate['decision'], 'Reject')
-                    self.assertEqual(candidate['status'], 'no_op')
-                    self.assertIsNone(candidate['probabilities'])
-            self.assertEqual(online[1]['rounds'][1]['before'], '坏修改')
-            self.assertEqual(len(online[0]['rounds']), 1)  # Reject stops revision.
-            self.assertEqual(static[1]['bank_size_at_start'], 0)
-            self.assertEqual(online[1]['bank_size_at_start'], 1)
-            self.assertEqual(online[1]['rounds'][0]['online_retrieved'], 1)
-            self.assertEqual(events.count('classify'), 6)
-            self.assertEqual(events.count('feedback'), 4)
-            self.assertEqual(events.count('rebuild'), 2)
+                self.assertTrue(all(len(rd['candidates']) == 1 for r in records for rd in r['rounds']))
+                candidate = records[1]['rounds'][1]['candidates'][0]
+                self.assertEqual(candidate['decision'], 'Reject')
+                self.assertEqual(candidate['status'], 'no_op')
+                self.assertIsNone(candidate['probabilities'])
+                self.assertEqual(records[1]['rounds'][1]['before'], '坏修改')
+                self.assertEqual(len(records[0]['rounds']), 1)  # Reject stops this source immediately.
+            self.assertEqual(static[2]['bank_size_at_start'], 0)
+            self.assertEqual(online[1]['bank_size_at_start'], 0)  # Same batch cannot see feedback.
+            self.assertEqual(online[2]['bank_size_at_start'], 1)
+            self.assertEqual(online[2]['rounds'][0]['online_retrieved'], 1)
+            first_feedback = next(i for i, (event, _) in enumerate(static_events) if event == 'feedback')
+            self.assertEqual([v for event, v in static_events[:first_feedback] if event == 'generate'],
+                             [['source0|初稿', 'source1|初稿'], ['source1|坏修改']])
+            self.assertEqual(sum(e == 'classify' for e, _ in events), 4)
+            self.assertEqual(sum(e == 'feedback' for e, _ in events), 4)
+            self.assertEqual(sum(e == 'rebuild' for e, _ in events), 1)
             self.assertNotIn('SECRET', (out / 'full_online/final_memory.jsonl').read_text())
 
 

@@ -19,6 +19,7 @@ COLLECTION = ROOT / 'runs/acceptance_data_v2'
 SCHEMA = 'laya-accept-reject-v1'
 LABELS = ['Accept', 'Reject']
 INPUT_FIELDS = ('source', 'current', 'candidate')
+LEGACY_INPUT_VERSION = 'english-to-chinese-task-v1'
 MODEL_POPULATION = 'current != candidate; exact string comparison'
 NO_OP_RULE = 'current == candidate -> Reject before Laya; audit only'
 CRITERIA = {
@@ -31,6 +32,9 @@ SEED = 42
 
 
 def read_jsonl(path):
+    # New sealed datasets cannot be read through historical evaluation entry points.
+    from multigen_data.common import guard_sealed_path
+    guard_sealed_path(path)
     return [json.loads(s) for s in Path(path).read_text().splitlines() if s.strip()]
 
 
@@ -69,9 +73,14 @@ def require_changed_pairs(rows):
             raise ValueError('No-op pairs belong in audit only, not Laya training/evaluation: ' + str(row.get('id', 'unknown')))
 
 
-def state_text(inputs, swap=False):
+def state_text(inputs, swap=False, template_version=LEGACY_INPUT_VERSION):
     if swap:
         raise ValueError('Binary Reject cannot be reversed without offline feedback; answer swapping is disabled')
+    if template_version != LEGACY_INPUT_VERSION:
+        from multigen_data.common import INPUT_VERSION, state_text as three_field_text
+        if template_version != INPUT_VERSION:
+            raise ValueError('Unknown input template version')
+        return three_field_text(inputs)
     x = model_input(inputs)
     return (f"Task: English-to-Chinese Translation\n\nSource:\n{x['source']}"
             f"\n\nCurrent Answer:\n{x['current']}\n\nCandidate Answer:\n{x['candidate']}")
@@ -117,21 +126,35 @@ def load_model(path=OUT / 'best', *, initialization=False):
 
 
 class EncodedPairs:
-    def __init__(self, rows, tok, allow_swap=False):
+    def __init__(self, rows, tok, allow_swap=False, template_version=None):
         from laya.common import build_sequence
         if allow_swap:
             raise ValueError('Current/Candidate swapping requires recomputed offline labels and is disabled')
         require_changed_pairs(rows)
         self.rows = rows
         self.tok = tok
+        versions = {r.get('metadata', {}).get('input_template_version', LEGACY_INPUT_VERSION) for r in rows}
+        if template_version is None:
+            if len(versions) > 1:
+                raise ValueError('Cannot mix input template versions')
+            template_version = next(iter(versions), LEGACY_INPUT_VERSION)
+        elif any(r.get('metadata', {}).get('input_template_version', template_version) != template_version for r in rows):
+            raise ValueError('Checkpoint and data input templates differ')
+        self.template_version = template_version
+        question = QUESTION
+        if template_version != LEGACY_INPUT_VERSION:
+            from multigen_data.common import INPUT_VERSION, QUESTION as THREE_FIELD_QUESTION
+            if template_version != INPUT_VERSION:
+                raise ValueError('Unknown input template version')
+            question = THREE_FIELD_QUESTION
         self.prefixes = {}
         for order in itertools.permutations(range(2)):
-            ids, markers = build_sequence(tok, '', QUESTION, 1024, 256, option_order=list(order), state_ids=[])
+            ids, markers = build_sequence(tok, '', question, 1024, 256, option_order=list(order), state_ids=[])
             self.prefixes[order] = (ids[:-1], markers)
         self.states = []
         self.max_len = 0
         for row in rows:
-            text = state_text(row['input']).replace(tok.mask_token, ' ')
+            text = state_text(row['input'], template_version=self.template_version).replace(tok.mask_token, ' ')
             ids = tok(text, add_special_tokens=False)['input_ids']
             length = max(len(p[0]) for p in self.prefixes.values()) + len(ids) + 1
             if length > 1024:

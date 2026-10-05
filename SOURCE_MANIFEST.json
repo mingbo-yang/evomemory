@@ -91,13 +91,23 @@
     },
     {
       "path": "exp/README.md",
-      "sha256": "fac19dc903c22d3d43949c06cfc832a9d5357c1fa6df05c53e9b26f5471dc736",
-      "bytes": 2400
+      "sha256": "c681c8e91303e802ed5830409e6a9884ee88384210459d8d26eae48a26498494",
+      "bytes": 9982
+    },
+    {
+      "path": "exp/ablations/__init__.py",
+      "sha256": "be908749f28ac3811869dcb274a29990efdb25c9b5ece55a252f0fe7f5f38f6e",
+      "bytes": 80
+    },
+    {
+      "path": "exp/ablations/laya_candidate_count.py",
+      "sha256": "70e3b15b8f04d171d5fbfa3a1823e213c96ee1156c41b7ac4e77b8e29701e9f7",
+      "bytes": 9736
     },
     {
       "path": "exp/acceptance_data.py",
-      "sha256": "9b5134b52b33d07fd210839d1253947923c23dbde738c879f35394366f80ca8f",
-      "bytes": 19387
+      "sha256": "d5b7151782ca0ad8e4a158eefdfbdd64225cc9b2568b93fb81c11a4e37251920",
+      "bytes": 18625
     },
     {
       "path": "exp/acceptance_data_job.py",
@@ -110,6 +120,11 @@
       "bytes": 14240
     },
     {
+      "path": "exp/analyze_candidate_count_ablation.py",
+      "sha256": "6a36bd0dfb583f4e517932e8711bee88bcf38d53873d9a8174549fc9b3704546",
+      "bytes": 10909
+    },
+    {
       "path": "exp/analyze_laya_acceptance.py",
       "sha256": "4715a993e98f9c936508d2e56d5ef5a7209a90363ed7019d70b58a2f505e49ee",
       "bytes": 9305
@@ -118,6 +133,11 @@
       "path": "exp/audit_laya_relaxed_accepts.py",
       "sha256": "dd387a62d2045bbaf4054b00ccf294c715574237005ed6b6f415253f36229347",
       "bytes": 3286
+    },
+    {
+      "path": "exp/audit_multigen_collection.py",
+      "sha256": "ecde97cc63e7efec4a81be04f0cefe16507a0fcb968b17657c8ecd8ad3b8bac1",
+      "bytes": 6779
     },
     {
       "path": "exp/audit_optimized_flow.py",
@@ -170,14 +190,19 @@
       "bytes": 2478
     },
     {
+      "path": "exp/compare_laya_epoch_checkpoints.py",
+      "sha256": "62489daf08de3d8e4005bca24cebbd4b24ec7c2d417c7ed6bfd3c63a9c68e755",
+      "bytes": 17016
+    },
+    {
       "path": "exp/configs/frozen.json",
       "sha256": "8c35933dcab7f41129d3bcbec97d8ea8c5aa461c63b0d0b0bc482cadc3dbd8f9",
       "bytes": 16381
     },
     {
       "path": "exp/configs/laya_binary_v1.json",
-      "sha256": "3e1f012ac8b7a99f2ca73e4078a145202f1956e2a7be1b1eadc67461d5b608d2",
-      "bytes": 802
+      "sha256": "2e476fbbf586dbf9fa96fe636c233940af6a45e6e58e4564d2e92c77155d11d0",
+      "bytes": 948
     },
     {
       "path": "exp/configs/optimized_feedback_v1.json",
@@ -213,6 +238,11 @@
       "path": "exp/core/bm25_fields.py",
       "sha256": "c5ed1511adb9a9444cf50a179d31ff0dabf6b07727a3e2513b508672acd21321",
       "bytes": 13869
+    },
+    {
+      "path": "exp/core/candidate_validation.py",
+      "sha256": "1e17b85e6fff0b0126fb4f07909f2fa1f322eae348f4353c3dd80cce7e2ce807",
+      "bytes": 1152
     },
     {
       "path": "exp/core/comet_feedback.py",
@@ -261,8 +291,8 @@
     },
     {
       "path": "exp/core/optimized_pipeline.py",
-      "sha256": "80f6988ec79e77ede020733d19f9afa4d9e80033d4f1c5b5c8c76b92f2d1a497",
-      "bytes": 7274
+      "sha256": "0692bc83194ad9c0c271eec55d429208414526dd27f307d2c12eb6d013c12a8f",
+      "bytes": 6779
     },
     {
       "path": "exp/core/pipeline.py",
@@ -273,6 +303,11 @@
       "path": "exp/core/quality_feedback.py",
       "sha256": "d1061ba91af7c41cc91ec9b421a4f327330429a7fc9d5130f76a0511343e82d5",
       "bytes": 5136
+    },
+    {
+      "path": "exp/core/refinement_instructions.py",
+      "sha256": "f97a1a256dfbcd799851b53882e0d656e772086345453737f9c926e376df652d",
+      "bytes": 626
     },
     {
       "path": "exp/core/retrieval_cache.py",
@@ -288,6 +323,31 @@
       "path": "exp/core/stats.py",
       "sha256": "d66f568101aa3a89d19b2216955886db178a865a2b72c84b173002e3e3c2cdb7",
       "bytes": 3482
+    },
+    {
+      "path": "exp/deployment/client_example.py",
+      "sha256": "28683dfafecb4b42e9c755c1b31ee2031721b393b93ad16c240fbaf3e3861380",
+      "bytes": 1244
+    },
+    {
+      "path": "exp/deployment/manage_vllm_services.py",
+      "sha256": "42e487a5c1fbcc0157f18b08722ceeca7fd36db1f8647676602e01942ec45f58",
+      "bytes": 9070
+    },
+    {
+      "path": "exp/deployment/usage_zh.txt",
+      "sha256": "9523ca61a4faae45f6511aa3442295ae31e1c83fcad8c6d148019970cde75ef6",
+      "bytes": 2301
+    },
+    {
+      "path": "exp/deployment/verify_deployed_services.py",
+      "sha256": "e71c45713707ba39ea8b67f9bf7e7d76d8e1163831c739e6ac9877ec85be9c12",
+      "bytes": 3700
+    },
+    {
+      "path": "exp/deployment/vllm_services.json",
+      "sha256": "33b5d40d5975badf22b06c715e70329f8f1b0f1ccaa55dad2da301b5ea2ff79d",
+      "bytes": 1062
     },
     {
       "path": "exp/dispatcher.py",
@@ -361,8 +421,8 @@
     },
     {
       "path": "exp/laya_acceptance_common.py",
-      "sha256": "4f5c8f156d4560dc7336d2839f6d625ae786d72d64af786e30c87d8f13260afd",
-      "bytes": 13905
+      "sha256": "e16febd046c409d77c29a6125d11dd9bfebc6cf15e4c31f7e55a5c79553df137",
+      "bytes": 15419
     },
     {
       "path": "exp/laya_relaxed_bleu_control.py",
@@ -371,13 +431,13 @@
     },
     {
       "path": "exp/laya_relaxed_flow.py",
-      "sha256": "864e8f8973dfffdd02909e8c099f78ad5c2fc3f732b301ef028d2255399da26c",
-      "bytes": 22036
+      "sha256": "88f09adec4b52d47aa2b4ad97c34e07f0c69fe09721bc3de8cf9d9b1b37518db",
+      "bytes": 23355
     },
     {
       "path": "exp/laya_relaxed_policy.py",
-      "sha256": "ebfa091b64fd3f35b11695f51854ce6f678822357e2537a7babb4f4a1a641552",
-      "bytes": 1378
+      "sha256": "9c09e89cb9c49aaf55b50c272015d8f5e3da343ac5951043d37134c4551c5981",
+      "bytes": 1270
     },
     {
       "path": "exp/legacy_laya_v1/__init__.py",
@@ -420,6 +480,51 @@
       "bytes": 50850
     },
     {
+      "path": "exp/monitor_multigen_completion.py",
+      "sha256": "6798bd81f9f0e6f94bb30b0a61e0c9708ff3535917acea178274a54ba3a80055",
+      "bytes": 14837
+    },
+    {
+      "path": "exp/multigen_data/__init__.py",
+      "sha256": "2ab0ca66020bb81196ffceabbc7f8d9ecb17112a51da7434d488a8b8f698a6ae",
+      "bytes": 52
+    },
+    {
+      "path": "exp/multigen_data/cli.py",
+      "sha256": "f425139f47c7041a893c1596220745094e3a562d923e2c2510ea75d5b0240d96",
+      "bytes": 5794
+    },
+    {
+      "path": "exp/multigen_data/collect.py",
+      "sha256": "37780782065ca01b887035e54aa90249e38c595c6170187d1f1d7f1e2ca0d9c8",
+      "bytes": 12662
+    },
+    {
+      "path": "exp/multigen_data/common.py",
+      "sha256": "a94f4b89f8087fabc2cf7bc138c737e1d409d3b64d26cb1f0688fb8197fa90f7",
+      "bytes": 11836
+    },
+    {
+      "path": "exp/multigen_data/prepare.py",
+      "sha256": "891dfd0fc4d66fbe4303ef5706fd90a87f11a7e2f14a13f097b5144996eabc3a",
+      "bytes": 17461
+    },
+    {
+      "path": "exp/multigen_data/processing.py",
+      "sha256": "6c65d425dfa5462601221851521631b7ad731a6db5acf5009a8688c8de3142a9",
+      "bytes": 14346
+    },
+    {
+      "path": "exp/multigen_evaluation.py",
+      "sha256": "596445878a1b98f2588bb171ed317824dbeb8fab15de3249d3230cfc567087e4",
+      "bytes": 5416
+    },
+    {
+      "path": "exp/multigen_streaming.py",
+      "sha256": "c6ddd94d9ec6dd31b9eb6361e9a39f797e920e04d09b0fcd852768bebb66344a",
+      "bytes": 5383
+    },
+    {
       "path": "exp/onpolicy_bert_data.py",
       "sha256": "18237832e512ce44ec99d9b88c76ca30c85e678fba72722bef6cb7ea276801e6",
       "bytes": 6698
@@ -446,8 +551,8 @@
     },
     {
       "path": "exp/prepare_acceptance_training.py",
-      "sha256": "dd82a079316082eb3107e59e1447d960d1e7b62932f2320e6beff13b85611433",
-      "bytes": 10708
+      "sha256": "aacd05eb2dee23d091d2437874c175362ecea05ddbd4da266312eb528d74e2f6",
+      "bytes": 10568
     },
     {
       "path": "exp/prepare_expanded_laya_calibration.py",
@@ -565,14 +670,19 @@
       "bytes": 1480
     },
     {
+      "path": "exp/reports/LAYA_BINARY_10EPOCH_COMPARISON.md",
+      "sha256": "9feae1885dad8da3e80f229b73d87314097501b597fc6d640e9be22c7201b6a0",
+      "bytes": 13929
+    },
+    {
       "path": "exp/reports/LAYA_BINARY_IMPLEMENTATION_CHECKS.json",
       "sha256": "cd14a595e5a101dce9327a79692a83a779941fd7502d736f94d69bc129c89100",
       "bytes": 1859
     },
     {
       "path": "exp/reports/LAYA_BINARY_PROTOCOL.md",
-      "sha256": "0bb94250f576b88cec569b01b0a731a3d23c8305b69a062c1082e05c3aa7faa9",
-      "bytes": 7136
+      "sha256": "890eb36e32f8405f2195b8e358dc4c12312c48391af0b79d4e863485615aef4c",
+      "bytes": 12210
     },
     {
       "path": "exp/reports/LAYA_BINARY_TRAINING_V1.md",
@@ -675,6 +785,11 @@
       "bytes": 550
     },
     {
+      "path": "exp/run_candidate_count_ablation.py",
+      "sha256": "0585092ba0a7a9fcbd124caf5a4349e6b948442fdaebceed293bc8a8c02722e0",
+      "bytes": 15756
+    },
+    {
       "path": "exp/run_dev_gate.sh",
       "sha256": "32abbe23ef6f410be1a1e0cb5c3720f8453305f1a6e23ffac7e2f142cf0d0669",
       "bytes": 2444
@@ -718,6 +833,16 @@
       "path": "exp/run_main_chain.sh",
       "sha256": "b046e162015bbc892bd6f6c7b2915ea24e3ec7db5791d334636fbace8a168b5a",
       "bytes": 989
+    },
+    {
+      "path": "exp/run_multigen_async.py",
+      "sha256": "b45b876c8078768251361d807e4ad2f99a65b8ae56997ad3289a8387b2794b86",
+      "bytes": 14983
+    },
+    {
+      "path": "exp/run_multigen_pipeline.py",
+      "sha256": "0dbd21df2f33b600d0d6d29d980d8a85e0c5d8832d68c391f398d4175af74b25",
+      "bytes": 11647
     },
     {
       "path": "exp/run_phase0.py",
@@ -805,6 +930,11 @@
       "bytes": 1058
     },
     {
+      "path": "exp/tests/test_candidate_count_ablation.py",
+      "sha256": "140db1354f5d68dbe521eb0423525d760e33ea03b6a0cc29ab581cf2d86c50f7",
+      "bytes": 3912
+    },
+    {
       "path": "exp/tests/test_comet_feedback.py",
       "sha256": "2f2be63946f2d77eb2c6ce7ed1cb3fc852426f8e1a217b5d34d8c7dc82ace753",
       "bytes": 3552
@@ -840,9 +970,24 @@
       "bytes": 4912
     },
     {
+      "path": "exp/tests/test_laya_checkpoint_retention.py",
+      "sha256": "7bbe6a8a65633851963979faa12278d691d5bd33c982696b1767a4e174af0e6f",
+      "bytes": 1627
+    },
+    {
+      "path": "exp/tests/test_laya_continuation.py",
+      "sha256": "96a3cbab310b90146535cfb1d401c4ab4ec31430892fb0bf675a75c9e3356a0c",
+      "bytes": 4408
+    },
+    {
+      "path": "exp/tests/test_laya_epoch_comparison.py",
+      "sha256": "78c23b020e0934139055c582ae34c2598621fecf014a541630d153b1551886a6",
+      "bytes": 4236
+    },
+    {
       "path": "exp/tests/test_laya_relaxed_flow.py",
-      "sha256": "3ad129454914b4cdee9acdb871a472c65acd614f179c0e8be6739564a97919dd",
-      "bytes": 8611
+      "sha256": "ab3d96d869609282de2e47e0c1f7df36367136399be541b194483925a3422531",
+      "bytes": 11150
     },
     {
       "path": "exp/tests/test_laya_safe_acceptance.py",
@@ -863,6 +1008,31 @@
       "path": "exp/tests/test_legacy_prepare_acceptance_training.py",
       "sha256": "3d48eb2eeea66f10a92d6db7a3d9d1fea43b768f8417847c653a90987d967c50",
       "bytes": 1615
+    },
+    {
+      "path": "exp/tests/test_multigen_async.py",
+      "sha256": "38ef60b2d05fd0ab721dc20a9ad3c04fa35fe3d58afb38af95b583c8cdf054f8",
+      "bytes": 5428
+    },
+    {
+      "path": "exp/tests/test_multigen_completion_monitor.py",
+      "sha256": "716f1299fc37448c3c0ce4bd557a5cb5d8b4e508509af3a06311f200b9dafa1d",
+      "bytes": 5303
+    },
+    {
+      "path": "exp/tests/test_multigen_data.py",
+      "sha256": "1b6022c19bee623053e78eae47c353a375b976b427ce2d18e982ab7ca4d55101",
+      "bytes": 10027
+    },
+    {
+      "path": "exp/tests/test_multigen_evaluation.py",
+      "sha256": "28c646d020d20a067201d3d227229da639a831c8cb402e9b49804eba335f0774",
+      "bytes": 1418
+    },
+    {
+      "path": "exp/tests/test_multigen_pipeline.py",
+      "sha256": "55f87e13b454af014a44ae2e8233e88ec7383d878d904683faefe0eb1340dc1f",
+      "bytes": 7188
     },
     {
       "path": "exp/tests/test_onpolicy_bert_study.py",
@@ -916,8 +1086,8 @@
     },
     {
       "path": "exp/train_laya_acceptance.py",
-      "sha256": "a9c7d54b74df94870e97beb86c01c12270202f9c94ffe94f5f00ae0368fddf85",
-      "bytes": 8301
+      "sha256": "a8699c89233fe16bf23e2127cc0dd103e9666913519b96d495f53961dfbe0972",
+      "bytes": 16713
     },
     {
       "path": "exp/vendor/laya/.dockerignore",
@@ -2230,6 +2400,11 @@
       "bytes": 3628
     },
     {
+      "path": "exp/verify_single_candidate_replay.py",
+      "sha256": "43399f09aab5cd363f86d5736edb2bd3c7d3a2e41e6c6335cf35363914d558d2",
+      "bytes": 5390
+    },
+    {
       "path": "exp/warm_cache.sh",
       "sha256": "90aff46c189b70fb6430150201afa0e3c229a379f619403029a03c71fa3766ef",
       "bytes": 407
@@ -2239,5 +2414,7 @@
       "sha256": "5938d3df9a9a136aebfa05625a89d2c8f00f37efcb1f2710a2a5a566b212cd51",
       "bytes": 1812
     }
-  ]
+  ],
+  "updated_at_utc": "2026-10-05T07:57:27.547221+00:00",
+  "sync_note": "Experiment source, configs, tests and documentation only; excludes generated report JSON, data, weights, raw outputs and sealed Test artifacts."
 }

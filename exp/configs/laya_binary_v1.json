@@ -1,13 +1,20 @@
 {
   "decision_schema": "laya-accept-reject-v1",
-  "labels": ["Accept", "Reject"],
-  "input_schema": ["source", "current", "candidate"],
+  "labels": [
+    "Accept",
+    "Reject"
+  ],
+  "input_schema": [
+    "source",
+    "current",
+    "candidate"
+  ],
   "model_population": "current != candidate; exact string comparison",
   "no_op_rule": "current == candidate -> Reject before Laya; audit only",
   "label_epsilon": 0.0,
   "epsilon_memory": 0.0,
   "decision_rule": "raw binary argmax; exact tie Reject",
-  "candidate_selection": "first Accept in generation order",
+  "candidate_selection": "sole valid changed candidate; Accept replaces Current, Reject stops revision",
   "probabilities": "diagnostics only",
   "feedback": {
     "metric": "comet",
@@ -15,5 +22,7 @@
     "python": "/mnt/huawei/ymb/.tmp/laya_comet_env/bin/python",
     "device": "cpu",
     "batch_size": 8
-  }
+  },
+  "candidates_per_round": 1,
+  "flow_schema": "laya-single-candidate-v1"
 }

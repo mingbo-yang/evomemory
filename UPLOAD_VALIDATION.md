@@ -1,3 +1,53 @@
+# Source synchronization — 2026-10-05
+
+Synchronized the current `aaai2027/exp` implementation and its sibling baseline
+source dependency. This update includes formal single-candidate acceptance,
+checkpoint retention and continuation, fixed-current five-generator data
+collection, sealed-Test enforcement, source-clustered evaluation, concurrent
+collection/cleaning and completion monitoring. Runtime artifacts and model weights
+remain on the experiment host.
+
+Validation was run in this independent publication checkout:
+
+- 93 selected offline regression tests passed in 10.72 seconds.
+- All 480 source-manifest entries match both the local source and publication copy
+  by SHA-256; 291 Python files passed syntax parsing.
+- The full staged whitespace check reports an existing extra final blank line in
+  `exp/ablations/laya_candidate_count.py` and `exp/core/candidate_validation.py`.
+  Both are preserved byte-for-byte from the experiment source; this upload does
+  not reformat frozen runtime code. Publication metadata/documents pass their
+  separate whitespace check.
+- No matches were found for the checked common credential-token/private-key
+  patterns in the source manifest.
+- No real GPU inference, checkpoint training or Test quality evaluation was run
+  for this upload. These checks validate software behavior, not model efficacy.
+
+The selected regression command, from `exp/`, was:
+
+```bash
+PYTHONPATH=/mnt/huawei/ymb/.tmp/laya_multigen_test_deps:$PWD \
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PYTHONDONTWRITEBYTECODE=1 \
+OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 \
+/home/ymb/miniconda3/envs/qwen35/bin/python -m pytest -q \
+  -p no:cacheprovider --basetemp=/tmp/aaai-github-20261005-tests --tb=short \
+  tests/test_multigen_data.py tests/test_multigen_async.py \
+  tests/test_multigen_pipeline.py tests/test_multigen_completion_monitor.py \
+  tests/test_multigen_evaluation.py tests/test_laya_acceptance.py \
+  tests/test_laya_relaxed_flow.py tests/test_candidate_count_ablation.py \
+  tests/test_prepare_acceptance_training.py tests/test_laya_checkpoint_retention.py \
+  tests/test_laya_continuation.py tests/test_laya_epoch_comparison.py \
+  tests/test_acceptance_data.py tests/test_optimized_feedback.py \
+  tests/test_comet_feedback.py
+```
+
+The temporary dependency directory supplies pytest for the existing environment.
+A fresh checkout still needs the documented Python dependencies and local external
+resources for data-dependent audits. The historical validation records below refer
+to the earlier snapshots, not the current protocol.
+
+---
+
 # Binary acceptance update — 2026-09-30
 
 Current Laya task: Accept/Reject with raw two-option classification. Exact no-op candidates bypass Laya and are excluded from primary training/evaluation; changed candidates with equal COMET remain Reject. Both offline tolerances are zero. Prior three-class experiments are isolated under `exp/legacy_laya_v1/`.

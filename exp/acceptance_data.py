@@ -14,9 +14,8 @@ import hashlib
 import json
 from pathlib import Path
 import random
-import re
-import unicodedata
 
+from core.candidate_validation import norm, valid_candidate
 from core.manifest import _iter_wmt_train_pairs, SampleRef, read_manifest, sha256_text
 from core.experience import load_experiences, save_experiences, render_experience_block
 
@@ -26,9 +25,6 @@ TASK = 'wmt19_en_zh'
 SEED = 20260926
 FOLDS = {'train': 10000, 'development': 400, 'temperature_calibration': 256,
          'threshold_calibration': 256, 'test': 400}
-
-def norm(s):
-    return ''.join(unicodedata.normalize('NFKC', s).casefold().split())
 
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -41,23 +37,6 @@ def dump(path, value):
 
 def seed_for(*parts):
     return int(hashlib.sha256('|'.join(map(str, (SEED, *parts))).encode()).hexdigest()[:8], 16) % (2**31)
-
-def valid_candidate(before, generation):
-    text = generation['text'].strip()
-    if generation['finish_reason'] == 'context_length_exceeded':
-        return False, 'context_length_exceeded'
-    if not text:
-        return False, 'empty'
-    if generation['finish_reason'] != 'stop':
-        return False, 'unfinished'
-    if any(x in text.lower() for x in ('<think>', '</think>', '```')):
-        return False, 'format'
-    if not re.search(r'[\u3400-\u9fff]', text):
-        return False, 'no_chinese'
-    # Basic safety gate only; never select by feedback or by estimated quality.
-    if before and len(norm(text)) > 1.5 * len(norm(before)) + 8:
-        return False, 'length'
-    return True, 'valid'
 
 def choose_next(sample_id, before, candidates):
     eligible = [i for i, g in enumerate(candidates) if valid_candidate(before, g)[0]]
